@@ -48,16 +48,12 @@ lv_obj_t * ui_Label57;
 lv_obj_t * ui_switch_status;
 lv_obj_t * ui_Label50;
 lv_obj_t * ui_Container6;
-lv_obj_t * ui_Label1;
 lv_obj_t * ui_sw1;
 lv_obj_t * ui_Container7;
-lv_obj_t * ui_Label45;
 lv_obj_t * ui_sw2;
 lv_obj_t * ui_Container8;
-lv_obj_t * ui_Label46;
 lv_obj_t * ui_sw3;
 lv_obj_t * ui_Container17;
-lv_obj_t * ui_Label47;
 lv_obj_t * ui_sw4;
 lv_obj_t * ui_switch_container;
 lv_obj_t * ui_Container9;
@@ -72,27 +68,42 @@ lv_obj_t * ui_Label2;
 void ui_event_switch3_select(lv_event_t * e);
 lv_obj_t * ui_switch3_select;
 lv_obj_t * ui_Label11;
-lv_obj_t * ui_TabView1;
-lv_obj_t * ui_TabPage1;
-lv_obj_t * ui_Label5;
-lv_obj_t * ui_Container4;
-lv_obj_t * ui_Label3;
-lv_obj_t * ui_Label4;
 lv_obj_t * ui_Container1;
-void ui_event_Label37(lv_event_t * e);
-lv_obj_t * ui_Label37;
-void ui_event_Label38(lv_event_t * e);
-lv_obj_t * ui_Label38;
-lv_obj_t * ui_Label6;
-lv_obj_t * ui_Container3;
-lv_obj_t * ui_Label7;
-lv_obj_t * ui_Label8;
 lv_obj_t * ui_Container2;
-void ui_event_Label39(lv_event_t * e);
-lv_obj_t * ui_Label39;
-void ui_event_Label41(lv_event_t * e);
+void ui_event_auto_select_btn(lv_event_t * e);
+lv_obj_t * ui_auto_select_btn;
+lv_obj_t * ui_Label4;
+void ui_event_timer_select_btn(lv_event_t * e);
+lv_obj_t * ui_timer_select_btn;
+lv_obj_t * ui_Label5;
+lv_obj_t * ui_timer_number_select_box;
+void ui_event_switch1_select2(lv_event_t * e);
+lv_obj_t * ui_switch1_select2;
+lv_obj_t * ui_Label3;
+void ui_event_switch2_select2(lv_event_t * e);
+lv_obj_t * ui_switch2_select2;
+lv_obj_t * ui_Label7;
+void ui_event_switch3_select2(lv_event_t * e);
+lv_obj_t * ui_switch3_select2;
+lv_obj_t * ui_Label8;
+lv_obj_t * ui_auto_body;
+lv_obj_t * ui_Label6;
+lv_obj_t * ui_Container30;
+lv_obj_t * ui_Container31;
+lv_obj_t * ui_Label1;
+lv_obj_t * ui_Label24;
+lv_obj_t * ui_Container32;
+lv_obj_t * ui_Label28;
+lv_obj_t * ui_Label29;
 lv_obj_t * ui_Label41;
-lv_obj_t * ui_TabPage2;
+lv_obj_t * ui_Container21;
+lv_obj_t * ui_Container33;
+lv_obj_t * ui_Label30;
+lv_obj_t * ui_Label37;
+lv_obj_t * ui_Container34;
+lv_obj_t * ui_Label38;
+lv_obj_t * ui_Label39;
+lv_obj_t * ui_timer_body;
 lv_obj_t * ui_Container5;
 lv_obj_t * ui_Label36;
 lv_obj_t * ui_Switch1;
@@ -100,9 +111,7 @@ lv_obj_t * ui_Container12;
 lv_obj_t * ui_Label12;
 lv_obj_t * ui_Label13;
 lv_obj_t * ui_Container13;
-void ui_event_Label40(lv_event_t * e);
 lv_obj_t * ui_Label40;
-void ui_event_Label35(lv_event_t * e);
 lv_obj_t * ui_Label35;
 lv_obj_t * ui_Container11;
 lv_obj_t * ui_Label14;
@@ -121,19 +130,15 @@ lv_obj_t * ui_Button9;
 lv_obj_t * ui_Label20;
 lv_obj_t * ui_Button10;
 lv_obj_t * ui_Label21;
-lv_obj_t * ui_TabPage3;
-lv_obj_t * ui_TabPage4;
 lv_obj_t * ui_wifi_container;
 lv_obj_t * ui_Label22;
 lv_obj_t * ui_Container15;
-lv_obj_t * ui_TextArea1;
-void ui_event_Button11(lv_event_t * e);
+lv_obj_t * ui_Dropdown5;
 lv_obj_t * ui_Button11;
 lv_obj_t * ui_Label23;
 lv_obj_t * ui_TextArea2;
 lv_obj_t * ui_Container16;
 lv_obj_t * ui_Button12;
-lv_obj_t * ui_Label24;
 lv_obj_t * ui_sensor_container;
 lv_obj_t * ui_Label31;
 lv_obj_t * ui_Dropdown1;
@@ -143,13 +148,14 @@ lv_obj_t * ui_Label33;
 lv_obj_t * ui_Dropdown3;
 lv_obj_t * ui_Label34;
 lv_obj_t * ui_Dropdown4;
-lv_obj_t * ui_number_input_dialog;
+lv_obj_t * ui_number_and_time_dialog;
 lv_obj_t * ui_Panel2;
 lv_obj_t * ui_Container18;
 lv_obj_t * ui_Roller1;
 lv_obj_t * ui_Roller3;
 lv_obj_t * ui_Label25;
 lv_obj_t * ui_Roller2;
+lv_obj_t * ui_Roller4;
 lv_obj_t * ui_Container19;
 void ui_event_Button13(lv_event_t * e);
 lv_obj_t * ui_Button13;
@@ -157,25 +163,6 @@ lv_obj_t * ui_Label26;
 void ui_event_Button14(lv_event_t * e);
 lv_obj_t * ui_Button14;
 lv_obj_t * ui_Label27;
-lv_obj_t * ui_time_input_dialog;
-lv_obj_t * ui_Panel1;
-lv_obj_t * ui_Container20;
-lv_obj_t * ui_Roller4;
-lv_obj_t * ui_Roller5;
-lv_obj_t * ui_Label28;
-lv_obj_t * ui_Roller6;
-lv_obj_t * ui_Roller7;
-lv_obj_t * ui_Container21;
-void ui_event_Button15(lv_event_t * e);
-lv_obj_t * ui_Button15;
-lv_obj_t * ui_Label29;
-void ui_event_Button16(lv_event_t * e);
-lv_obj_t * ui_Button16;
-lv_obj_t * ui_Label30;
-lv_obj_t * ui_wifi_name_input_dialog;
-lv_obj_t * ui_wifi_list_group;
-void ui_event_Label44(lv_event_t * e);
-lv_obj_t * ui_Label44;
 lv_obj_t * ui____initial_actions0;
 
 ///////////////////// TEST LVGL SETTINGS ////////////////////
@@ -198,9 +185,7 @@ void ui_event_Index(lv_event_t * e)
         _ui_flag_modify(ui_switch_container, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_ADD);
         _ui_flag_modify(ui_wifi_container, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_ADD);
         _ui_flag_modify(ui_sensor_container, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_ADD);
-        _ui_flag_modify(ui_number_input_dialog, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_ADD);
-        _ui_flag_modify(ui_time_input_dialog, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_ADD);
-        _ui_flag_modify(ui_wifi_name_input_dialog, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_ADD);
+        _ui_flag_modify(ui_number_and_time_dialog, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_ADD);
     }
 }
 void ui_event_home_btn(lv_event_t * e)
@@ -293,60 +278,58 @@ void ui_event_switch3_select(lv_event_t * e)
         _ui_state_modify(ui_switch3_select, LV_STATE_CHECKED, _UI_MODIFY_STATE_ADD);
     }
 }
-void ui_event_Label37(lv_event_t * e)
+void ui_event_auto_select_btn(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_CLICKED) {
-        _ui_flag_modify(ui_number_input_dialog, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_REMOVE);
+        _ui_state_modify(ui_auto_select_btn, LV_STATE_CHECKED, _UI_MODIFY_STATE_ADD);
+        _ui_state_modify(ui_timer_select_btn, LV_STATE_CHECKED, _UI_MODIFY_STATE_REMOVE);
+        _ui_flag_modify(ui_auto_body, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_REMOVE);
+        _ui_flag_modify(ui_timer_body, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_ADD);
+        _ui_flag_modify(ui_timer_number_select_box, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_ADD);
     }
 }
-void ui_event_Label38(lv_event_t * e)
+void ui_event_timer_select_btn(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_CLICKED) {
-        _ui_flag_modify(ui_number_input_dialog, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_REMOVE);
+        _ui_state_modify(ui_auto_select_btn, LV_STATE_CHECKED, _UI_MODIFY_STATE_REMOVE);
+        _ui_state_modify(ui_timer_select_btn, LV_STATE_CHECKED, _UI_MODIFY_STATE_ADD);
+        _ui_flag_modify(ui_timer_number_select_box, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_REMOVE);
+        _ui_flag_modify(ui_timer_body, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_REMOVE);
+        _ui_flag_modify(ui_auto_body, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_ADD);
     }
 }
-void ui_event_Label39(lv_event_t * e)
+void ui_event_switch1_select2(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_CLICKED) {
-        _ui_flag_modify(ui_number_input_dialog, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_REMOVE);
+        _ui_state_modify(ui_switch1_select2, LV_STATE_CHECKED, _UI_MODIFY_STATE_ADD);
+        _ui_state_modify(ui_switch2_select2, LV_STATE_CHECKED, _UI_MODIFY_STATE_REMOVE);
+        _ui_state_modify(ui_switch3_select2, LV_STATE_CHECKED, _UI_MODIFY_STATE_REMOVE);
     }
 }
-void ui_event_Label41(lv_event_t * e)
+void ui_event_switch2_select2(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_CLICKED) {
-        _ui_flag_modify(ui_number_input_dialog, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_REMOVE);
+        _ui_state_modify(ui_switch1_select2, LV_STATE_CHECKED, _UI_MODIFY_STATE_REMOVE);
+        _ui_state_modify(ui_switch2_select2, LV_STATE_CHECKED, _UI_MODIFY_STATE_ADD);
+        _ui_state_modify(ui_switch3_select2, LV_STATE_CHECKED, _UI_MODIFY_STATE_REMOVE);
     }
 }
-void ui_event_Label40(lv_event_t * e)
+void ui_event_switch3_select2(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_CLICKED) {
-        _ui_flag_modify(ui_time_input_dialog, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_REMOVE);
-    }
-}
-void ui_event_Label35(lv_event_t * e)
-{
-    lv_event_code_t event_code = lv_event_get_code(e);
-    lv_obj_t * target = lv_event_get_target(e);
-    if(event_code == LV_EVENT_CLICKED) {
-        _ui_flag_modify(ui_time_input_dialog, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_REMOVE);
-    }
-}
-void ui_event_Button11(lv_event_t * e)
-{
-    lv_event_code_t event_code = lv_event_get_code(e);
-    lv_obj_t * target = lv_event_get_target(e);
-    if(event_code == LV_EVENT_CLICKED) {
-        _ui_flag_modify(ui_wifi_name_input_dialog, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_REMOVE);
+        _ui_state_modify(ui_switch1_select2, LV_STATE_CHECKED, _UI_MODIFY_STATE_REMOVE);
+        _ui_state_modify(ui_switch2_select2, LV_STATE_CHECKED, _UI_MODIFY_STATE_REMOVE);
+        _ui_state_modify(ui_switch3_select2, LV_STATE_CHECKED, _UI_MODIFY_STATE_ADD);
     }
 }
 void ui_event_Button13(lv_event_t * e)
@@ -354,7 +337,7 @@ void ui_event_Button13(lv_event_t * e)
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_CLICKED) {
-        _ui_flag_modify(ui_number_input_dialog, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_ADD);
+        _ui_flag_modify(ui_number_and_time_dialog, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_ADD);
     }
 }
 void ui_event_Button14(lv_event_t * e)
@@ -362,31 +345,7 @@ void ui_event_Button14(lv_event_t * e)
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_CLICKED) {
-        _ui_flag_modify(ui_number_input_dialog, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_ADD);
-    }
-}
-void ui_event_Button15(lv_event_t * e)
-{
-    lv_event_code_t event_code = lv_event_get_code(e);
-    lv_obj_t * target = lv_event_get_target(e);
-    if(event_code == LV_EVENT_CLICKED) {
-        _ui_flag_modify(ui_time_input_dialog, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_ADD);
-    }
-}
-void ui_event_Button16(lv_event_t * e)
-{
-    lv_event_code_t event_code = lv_event_get_code(e);
-    lv_obj_t * target = lv_event_get_target(e);
-    if(event_code == LV_EVENT_CLICKED) {
-        _ui_flag_modify(ui_time_input_dialog, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_ADD);
-    }
-}
-void ui_event_Label44(lv_event_t * e)
-{
-    lv_event_code_t event_code = lv_event_get_code(e);
-    lv_obj_t * target = lv_event_get_target(e);
-    if(event_code == LV_EVENT_CLICKED) {
-        _ui_flag_modify(ui_wifi_name_input_dialog, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_ADD);
+        _ui_flag_modify(ui_number_and_time_dialog, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_ADD);
     }
 }
 

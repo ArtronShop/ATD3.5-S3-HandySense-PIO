@@ -9,7 +9,8 @@ SET(SOURCES screens/ui_Index.c
     images/ui_img_2021756275.c
     images/ui_img_2004695613.c
     images/ui_img_504422231.c
-    images/ui_img_1954556228.c
+    images/ui_img_750881228.c
+    images/ui_img_361352527.c
     fonts/ui_font_Kanit20.c
     fonts/ui_font_Kanit24.c)
 
