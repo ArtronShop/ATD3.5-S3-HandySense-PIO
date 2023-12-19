@@ -1,4 +1,5 @@
 #include "HandySenseDHT22.h"
+#include "PinConfigs.h"
 
 #define DHT_OK 0
 #define DHT_CHECKSUM_ERROR -1
@@ -32,7 +33,7 @@
 
 static const char* TAG = "DHT";
 
-static int DHTgpio = 4;				// my default DHT pin = 4
+static gpio_num_t DHTgpio = (gpio_num_t) 4;				// my default DHT pin = 4
 static float humidity = 0.;
 static float temperature = 0.;
 
@@ -40,7 +41,7 @@ static float temperature = 0.;
 
 static void setDHTgpio( int gpio )
 {
-	DHTgpio = gpio;
+	DHTgpio = (gpio_num_t) gpio;
 }
 
 // == get temp & hum =============================================
@@ -225,7 +226,7 @@ static bool init_sensor = false;
 uint32_t last_update = 0;
 #define CHECK_SENSOR    ({ \
                             if (!init_sensor) {\
-                                setDHTgpio(D3);\
+                                setDHTgpio(D3_PIN);\
                                 init_sensor = true;\
                             }\
 							\

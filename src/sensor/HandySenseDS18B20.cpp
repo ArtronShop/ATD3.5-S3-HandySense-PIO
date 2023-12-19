@@ -1,9 +1,10 @@
 #include "HandySenseDHT22.h"
 #include <OneWire.h>
 #include <DallasTemperature.h>
+#include "PinConfigs.h"
 
 // Real Program part
-OneWire oneWire(D3);
+OneWire oneWire(D3_PIN);
 DallasTemperature sensors(&oneWire);
 
 static bool init_sensor = false;

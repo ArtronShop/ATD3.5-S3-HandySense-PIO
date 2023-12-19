@@ -6,7 +6,7 @@
 #include <NTPClient.h>
 #include <FS.h>
 #include <SPIFFS.h>
-#include <PubSubClientOK.h>
+#include <PubSubClient.h>
 #include <ArduinoJson.h>
 #include <time.h>
 #include <EEPROM.h>
@@ -17,14 +17,14 @@ int (*getHumi)(float*);
 int (*getSoil)(float*);
 int (*getLight)(float*);
 
-void timmer_setting(String topic, byte * payload, unsigned int length) ;
-void SoilMaxMin_setting(String topic, String message, unsigned int length) ;
+static void timmer_setting(String topic, byte * payload, unsigned int length) ;
+static void SoilMaxMin_setting(String topic, String message, unsigned int length) ;
 void TaskWifiStatus(void * pvParameters) ;
 void TaskWaitSerial(void * WaitSerial) ;
-void sent_dataTimer(String topic, String message) ;
-void ControlRelay_Bytimmer() ;
-void TempMaxMin_setting(String topic, String message, unsigned int length) ;
-void ControlRelay_Bymanual(String topic, String message, unsigned int length) ;
+static void sent_dataTimer(String topic, String message) ;
+static void ControlRelay_Bytimmer() ;
+static void TempMaxMin_setting(String topic, String message, unsigned int length) ;
+static void ControlRelay_Bymanual(String topic, String message, unsigned int length) ;
 
 #ifdef DEBUG
 #define DEBUG_PRINT(x)    //Serial.print(x)
@@ -74,7 +74,7 @@ Artron_DS1338 rtc(&Wire);
 
 // ประกาศใช้ WiFiClient
 WiFiClient espClient;
-PubSubClientOK client(espClient);
+PubSubClient client(espClient);
 
 // ประกาศใช้ WiFiUDP
 WiFiUDP ntpUDP;

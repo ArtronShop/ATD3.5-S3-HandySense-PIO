@@ -1,10 +1,7 @@
 #include "HandySenseRS485_SOIL.h"
+#include "PinConfigs.h"
 
-#define DE_RE_PIN 2
-#define MODE_SEND HIGH
-#define MODE_RECV LOW
-
-uint16_t CRC16(uint8_t *buf, int len) {
+static uint16_t CRC16(uint8_t *buf, int len) {
 	uint16_t crc = 0xFFFF;
 	for (uint16_t pos = 0; pos < len; pos++) {
 		crc ^= (uint16_t)buf[pos]; // XOR byte into least sig. byte of crc
@@ -25,10 +22,7 @@ uint16_t CRC16(uint8_t *buf, int len) {
 }
 
 bool readRS485_SOIL(uint8_t start_addr, float* value) {
-	pinMode(RS485_DIR, OUTPUT);
-	digitalWrite(RS485_DIR, MODE_RECV);
-
-	Serial2.begin(4800, SERIAL_8N1, RS485_RX, RS485_TX); // Rx, Tx
+	Serial2.begin(4800, SERIAL_8N1, RS485_RX_PIN, RS485_TX_PIN); // Rx, Tx
 	Serial2.setTimeout(200);
 
 	uint8_t buff[] = {
@@ -46,10 +40,8 @@ bool readRS485_SOIL(uint8_t start_addr, float* value) {
 	buff[6] = crc & 0xFF;
 	buff[7] = (crc >> 8) & 0xFF;
 
-	digitalWrite(RS485_DIR, MODE_SEND);
 	Serial2.write(buff, sizeof(buff));
 	Serial2.flush(); // wait MODE_SEND completed
-	digitalWrite(RS485_DIR, MODE_RECV);
 
 	if (Serial2.find("\x01\x03")) {
 		while(!Serial2.available()) delay(1);
