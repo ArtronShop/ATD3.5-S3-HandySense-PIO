@@ -1,3 +1,5 @@
+#pragma once
+
 // Output Coil
 #define O1_PIN (39)
 #define O2_PIN (38)
@@ -5,8 +7,8 @@
 #define O4_PIN (6)
 
 // RS485
-#define RS485_RX (41)
-#define RS485_TX (40)
+#define RS485_RX_PIN (41)
+#define RS485_TX_PIN (40)
 
 // Digital I/O
 #define D1_PIN (42)
@@ -17,5 +19,5 @@
 #define A1_PIN (1)
 #define A2_PIN (2)
 
-int o_pin[] = { O1_PIN, O2_PIN, O3_PIN, O4_PIN };
+const int o_pin[] = { O1_PIN, O2_PIN, O3_PIN, O4_PIN };
 
