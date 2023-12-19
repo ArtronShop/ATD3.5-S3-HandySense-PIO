@@ -1,6 +1,16 @@
 SET(SOURCES screens/ui_Index.c
     ui.c
     components/ui_comp_hook.c
-    ui_helpers.c)
+    ui_helpers.c
+    ui_events.c
+    images/ui_img_1344368723.c
+    images/ui_img_420491115.c
+    images/ui_img_1756937144.c
+    images/ui_img_2021756275.c
+    images/ui_img_2004695613.c
+    images/ui_img_504422231.c
+    images/ui_img_1954556228.c
+    fonts/ui_font_Kanit20.c
+    fonts/ui_font_Kanit24.c)
 
 add_library(ui ${SOURCES})
