@@ -4,3 +4,12 @@
 [submodule "lib/lvgl"]
 	path = lib/lvgl
 	url = https://github.com/lvgl/lvgl.git
+[submodule "lib/Arduino-Temperature-Control-Library"]
+	path = lib/Arduino-Temperature-Control-Library
+	url = https://github.com/milesburton/Arduino-Temperature-Control-Library.git
+[submodule "lib/ArduinoJson"]
+	path = lib/ArduinoJson
+	url = https://github.com/bblanchon/ArduinoJson.git
+[submodule "lib/NTPClient"]
+	path = lib/NTPClient
+	url = https://github.com/arduino-libraries/NTPClient.git
