@@ -1,0 +1,17 @@
+{
+  "codename": "Kanit24",
+  "ttf_path": "\\assets\\Kanit-Regular.ttf",
+  "bin_path": "\\assets\\ui_font_Kanit24.bin",
+  "c_path": "\\assets\\ui_font_Kanit24.c",
+  "cfg_path": "\\assets\\ui_font_Kanit24.fcfg",
+  "size": 24,
+  "bpp": 4,
+  "letters": 0,
+  "ranges": [
+    "0x20-0x7f",
+    "0x0E00-0x0E7F"
+  ],
+  "symbols": "",
+  "customparams": "--no-compress --no-prefilter",
+  "uploaded": false
+}
