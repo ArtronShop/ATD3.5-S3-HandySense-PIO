@@ -91,18 +91,18 @@ extern lv_obj_t * ui_Label6;
 extern lv_obj_t * ui_Container30;
 extern lv_obj_t * ui_Container31;
 extern lv_obj_t * ui_Label1;
-extern lv_obj_t * ui_Label24;
+extern lv_obj_t * ui_temp_min_input;
 extern lv_obj_t * ui_Container32;
 extern lv_obj_t * ui_Label28;
-extern lv_obj_t * ui_Label29;
+extern lv_obj_t * ui_temp_max_input;
 extern lv_obj_t * ui_Label41;
 extern lv_obj_t * ui_Container21;
 extern lv_obj_t * ui_Container33;
 extern lv_obj_t * ui_Label30;
-extern lv_obj_t * ui_Label37;
+extern lv_obj_t * ui_soil_min_input;
 extern lv_obj_t * ui_Container34;
 extern lv_obj_t * ui_Label38;
-extern lv_obj_t * ui_Label39;
+extern lv_obj_t * ui_soil_max_input;
 extern lv_obj_t * ui_timer_body;
 extern lv_obj_t * ui_Container5;
 extern lv_obj_t * ui_Label36;
@@ -158,15 +158,20 @@ extern lv_obj_t * ui_number_split_label;
 extern lv_obj_t * ui_number_digit3_input;
 extern lv_obj_t * ui_number_digit4_input;
 extern lv_obj_t * ui_Container19;
-void ui_event_Button13(lv_event_t * e);
-extern lv_obj_t * ui_Button13;
-extern lv_obj_t * ui_Label26;
-void ui_event_Button14(lv_event_t * e);
-extern lv_obj_t * ui_Button14;
-extern lv_obj_t * ui_Label27;
+void ui_event_save_btn(lv_event_t * e);
+extern lv_obj_t * ui_save_btn;
+extern lv_obj_t * ui_save_btn_label;
+void ui_event_cancel(lv_event_t * e);
+extern lv_obj_t * ui_cancel;
+extern lv_obj_t * ui_cancel_label;
 extern lv_obj_t * ui_loading;
 extern lv_obj_t * ui_Spinner1;
 extern lv_obj_t * ui_main_keyboard;
+// SCREEN: ui_loading_page
+void ui_loading_page_screen_init(void);
+extern lv_obj_t * ui_loading_page;
+extern lv_obj_t * ui_Image1;
+extern lv_obj_t * ui_Label25;
 extern lv_obj_t * ui____initial_actions0;
 
 LV_IMG_DECLARE(ui_img_1344368723);    // assets\home-icon.png
@@ -177,6 +182,7 @@ LV_IMG_DECLARE(ui_img_2004695613);    // assets\globe-icon.png
 LV_IMG_DECLARE(ui_img_504422231);    // assets\cloud-icon.png
 LV_IMG_DECLARE(ui_img_750881228);    // assets\redo-arrow-icon.png
 LV_IMG_DECLARE(ui_img_361352527);    // assets\check-mark-line-icon.png
+LV_IMG_DECLARE(ui_img_462897253);    // assets\Artron - 2.png
 
 LV_FONT_DECLARE(ui_font_Kanit20);
 LV_FONT_DECLARE(ui_font_Kanit24);

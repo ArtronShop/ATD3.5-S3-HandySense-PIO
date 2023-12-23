@@ -86,18 +86,18 @@ lv_obj_t * ui_Label6;
 lv_obj_t * ui_Container30;
 lv_obj_t * ui_Container31;
 lv_obj_t * ui_Label1;
-lv_obj_t * ui_Label24;
+lv_obj_t * ui_temp_min_input;
 lv_obj_t * ui_Container32;
 lv_obj_t * ui_Label28;
-lv_obj_t * ui_Label29;
+lv_obj_t * ui_temp_max_input;
 lv_obj_t * ui_Label41;
 lv_obj_t * ui_Container21;
 lv_obj_t * ui_Container33;
 lv_obj_t * ui_Label30;
-lv_obj_t * ui_Label37;
+lv_obj_t * ui_soil_min_input;
 lv_obj_t * ui_Container34;
 lv_obj_t * ui_Label38;
-lv_obj_t * ui_Label39;
+lv_obj_t * ui_soil_max_input;
 lv_obj_t * ui_timer_body;
 lv_obj_t * ui_Container5;
 lv_obj_t * ui_Label36;
@@ -153,16 +153,24 @@ lv_obj_t * ui_number_split_label;
 lv_obj_t * ui_number_digit3_input;
 lv_obj_t * ui_number_digit4_input;
 lv_obj_t * ui_Container19;
-void ui_event_Button13(lv_event_t * e);
-lv_obj_t * ui_Button13;
-lv_obj_t * ui_Label26;
-void ui_event_Button14(lv_event_t * e);
-lv_obj_t * ui_Button14;
-lv_obj_t * ui_Label27;
+void ui_event_save_btn(lv_event_t * e);
+lv_obj_t * ui_save_btn;
+lv_obj_t * ui_save_btn_label;
+void ui_event_cancel(lv_event_t * e);
+lv_obj_t * ui_cancel;
+lv_obj_t * ui_cancel_label;
 lv_obj_t * ui_loading;
 lv_obj_t * ui_Spinner1;
 lv_obj_t * ui_main_keyboard;
+
+
+// SCREEN: ui_loading_page
+void ui_loading_page_screen_init(void);
+lv_obj_t * ui_loading_page;
+lv_obj_t * ui_Image1;
+lv_obj_t * ui_Label25;
 lv_obj_t * ui____initial_actions0;
+const lv_img_dsc_t * ui_imgset_1570372579[1] = {&ui_img_462897253};
 
 ///////////////////// TEST LVGL SETTINGS ////////////////////
 #if LV_COLOR_DEPTH != 16
@@ -343,7 +351,7 @@ void ui_event_wifi_password(lv_event_t * e)
         _ui_flag_modify(ui_main_keyboard, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_ADD);
     }
 }
-void ui_event_Button13(lv_event_t * e)
+void ui_event_save_btn(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t * target = lv_event_get_target(e);
@@ -351,7 +359,7 @@ void ui_event_Button13(lv_event_t * e)
         _ui_flag_modify(ui_number_and_time_dialog, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_ADD);
     }
 }
-void ui_event_Button14(lv_event_t * e)
+void ui_event_cancel(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t * target = lv_event_get_target(e);
@@ -369,6 +377,7 @@ void ui_init(void)
                                                false, LV_FONT_DEFAULT);
     lv_disp_set_theme(dispp, theme);
     ui_Index_screen_init();
+    ui_loading_page_screen_init();
     ui____initial_actions0 = lv_obj_create(NULL);
     lv_disp_load_scr(ui_Index);
 }

@@ -7,12 +7,12 @@
 void setup() {
   Serial.begin(115200);
   
-  UI_init(); // Init LVGL and UI
   HandySense_init(); // Init HandySense, MQTT, WiFi Manager
+  UI_init(); // Init LVGL and UI
 }
 
 void loop() {
-  UI_loop();
   HandySense_loop();
-  delay(1);
+  UI_loop();
+  delay(5);
 }

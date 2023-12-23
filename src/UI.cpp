@@ -6,6 +6,7 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include "UI.h"
+#include <PinConfigs.h>
 
 static const char * TAG = "UI";
 
@@ -13,7 +14,9 @@ static void o_switch_click_handle(lv_event_t * e) {
   lv_obj_t * target = lv_event_get_target(e);
   int ch = (int) lv_event_get_user_data(e);
   bool value = lv_obj_has_state(target, LV_STATE_CHECKED);
-  // digitalWrite(o_pin[ch - 1], value);
+
+  extern void ControlRelay_Bymanual(String topic, String message, unsigned int length);
+  ControlRelay_Bymanual(String("@private/led") + String(ch - 1), value ? "on" : "off", 0);
 }
 
 static bool wait_wifi_scan = false;
@@ -32,6 +35,9 @@ void wifi_scan_task(void *) {
 static void wifi_refresh_click_handle(lv_event_t * e) {
   lv_obj_clear_flag(ui_loading, LV_OBJ_FLAG_HIDDEN);
 
+  extern bool pause_wifi_task;
+  pause_wifi_task = true;
+
   xTaskHandle wifi_scan_task_handle;
   static int n = 0;
   scan_finch = false;
@@ -40,6 +46,39 @@ static void wifi_refresh_click_handle(lv_event_t * e) {
 }
 
 static void wifi_save_click_handle(lv_event_t * e) {
+  char ssid[64];
+  lv_dropdown_get_selected_str(ui_wifi_name, ssid, sizeof(ssid));
+  const char * password = lv_textarea_get_text(ui_wifi_password);
+
+  extern void wifiConfig(String ssid, String password)  ;
+  wifiConfig(ssid, password);
+}
+
+static lv_obj_t * input_target = NULL;
+static void number_input(lv_event_t * e) {
+  input_target = lv_event_get_target(e);
+  lv_label_set_text(ui_number_split_label, ".");
+  lv_obj_add_flag(ui_number_digit4_input, LV_OBJ_FLAG_HIDDEN);
+  lv_obj_clear_flag(ui_number_and_time_dialog, LV_OBJ_FLAG_HIDDEN);
+}
+
+static void time_input(lv_event_t * e) {
+  input_target = lv_event_get_target(e);
+  lv_label_set_text(ui_number_split_label, ":");
+  lv_obj_clear_flag(ui_number_digit4_input, LV_OBJ_FLAG_HIDDEN);
+  lv_obj_clear_flag(ui_number_and_time_dialog, LV_OBJ_FLAG_HIDDEN);
+}
+
+static void number_time_input_save_click_handle(lv_event_t * e) {
+  uint16_t digit1 = lv_roller_get_selected(ui_number_digit1_input);
+  uint16_t digit2 = lv_roller_get_selected(ui_number_digit2_input);
+  uint16_t digit3 = lv_roller_get_selected(ui_number_digit3_input);
+  uint16_t digit4 = lv_roller_get_selected(ui_number_digit4_input);
+
+  lv_obj_add_flag(ui_number_and_time_dialog, LV_OBJ_FLAG_HIDDEN);
+  // lv_label_set_text_fmt(input_target, "%d%d:%d%d", digit1, digit2, digit3, digit4);
+  lv_label_set_text_fmt(input_target, "%d%d.%d", digit1, digit2, digit3);
+  lv_event_send(input_target, LV_EVENT_VALUE_CHANGED, NULL);
 }
 
 // Sound
@@ -104,6 +143,7 @@ void UI_init() {
   ui_init();
 
   // Add event handle
+  lv_obj_add_event_cb(ui_save_btn, number_time_input_save_click_handle, LV_EVENT_CLICKED, NULL);
 
   // -- Dashboard
   lv_obj_add_event_cb(ui_o1_switch, o_switch_click_handle, LV_EVENT_VALUE_CHANGED, (void*) 1);
@@ -112,10 +152,22 @@ void UI_init() {
   lv_obj_add_event_cb(ui_o4_switch, o_switch_click_handle, LV_EVENT_VALUE_CHANGED, (void*) 4);
 
   // -- Configs
+  lv_obj_add_event_cb(ui_temp_min_input, number_input, LV_EVENT_CLICKED, NULL);
+  lv_obj_add_event_cb(ui_temp_max_input, number_input, LV_EVENT_CLICKED, NULL);
+  lv_obj_add_event_cb(ui_soil_min_input, number_input, LV_EVENT_CLICKED, NULL);
+  lv_obj_add_event_cb(ui_soil_max_input, number_input, LV_EVENT_CLICKED, NULL);
 
   // -- WiFi
+  {
+    extern String ssid, password;
+    lv_dropdown_set_text(ui_wifi_name, ssid.c_str());
+    lv_textarea_set_text(ui_wifi_password, password.c_str());
+  }
   lv_obj_add_event_cb(ui_wifi_refresh, wifi_refresh_click_handle, LV_EVENT_CLICKED, NULL);
   lv_obj_add_event_cb(ui_wifi_save, wifi_save_click_handle, LV_EVENT_CLICKED, NULL);
+
+  
+  lv_disp_load_scr(ui_loading_page);
 }
 
 void UI_loop() {
@@ -160,11 +212,20 @@ void UI_loop() {
     // Update cloud status
     lv_obj_add_flag(ui_cloud_status_icon, LV_OBJ_FLAG_HIDDEN);
   }
-  
+
+  { // Update sensor value
+    extern float temp, humidity, lux_44009, soil;
+    lv_label_set_text_fmt(ui_temp_sensor_value, "%.01f °C", temp);
+    lv_label_set_text_fmt(ui_humi_sensor_value, "%.01f %%RH", humidity);
+    lv_label_set_text_fmt(ui_soil_sensor_value, "%.0f %%", soil);
+    lv_label_set_text_fmt(ui_light_sensor_value, "%.01f kLux", lux_44009);
+  }
+
   // WiFi Scan
   if (wait_wifi_scan) {
     if (scan_finch) {
       // Update wifi name dropdown
+      lv_dropdown_set_text(ui_wifi_name, NULL);
       lv_dropdown_set_options(ui_wifi_name, "");
       for (int i=0;i<scan_found;i++) {
         lv_dropdown_add_option(ui_wifi_name, WiFi.SSID(i).c_str(), LV_DROPDOWN_POS_LAST);
@@ -172,7 +233,36 @@ void UI_loop() {
       lv_obj_add_flag(ui_loading, LV_OBJ_FLAG_HIDDEN);
 
       WiFi.scanDelete();
+
+      extern bool pause_wifi_task;
+      pause_wifi_task = false;
+
       wait_wifi_scan = false;
     }
+  }
+
+  {
+    static bool first = true;
+    if (first) {
+      if (millis() > 3000) {
+        lv_disp_load_scr(ui_Index);
+        first = false;
+      }
+    }
+  }
+}
+
+void UI_updateOutputStatus(int i, bool isOn) {
+  lv_obj_t * ox_switch_list[] = {
+    ui_o1_switch, 
+    ui_o2_switch,
+    ui_o3_switch,
+    ui_o4_switch
+  };
+
+  if (isOn) {
+    lv_obj_add_state(ox_switch_list[i], LV_STATE_CHECKED);
+  } else {
+    lv_obj_clear_state(ox_switch_list[i], LV_STATE_CHECKED);
   }
 }

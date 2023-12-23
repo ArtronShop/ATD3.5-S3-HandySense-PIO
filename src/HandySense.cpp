@@ -12,6 +12,7 @@
 #include <EEPROM.h>
 #include "Artron_DS1338.h"
 #include "Sensor.h"
+#include "UI.h"
 #include "PinConfigs.h"
 
 static void timmer_setting(String topic, byte * payload, unsigned int length) ;
@@ -21,7 +22,7 @@ void TaskWaitSerial(void * WaitSerial) ;
 static void sent_dataTimer(String topic, String message) ;
 static void ControlRelay_Bytimmer() ;
 static void TempMaxMin_setting(String topic, String message, unsigned int length) ;
-static void ControlRelay_Bymanual(String topic, String message, unsigned int length) ;
+void ControlRelay_Bymanual(String topic, String message, unsigned int length) ;
 
 #ifndef DEBUG
 #define DEBUG_PRINT(x)    //Serial.print(x)
@@ -91,10 +92,10 @@ float difference_soil                         = 20.00,    // ค่าควา�
       difference_temp                         = 4.00;     // ค่าอุณหภูมิแตกต่างกัน +- 4 C เมื่อไรส่งค่าขึ้น Web app ทันที
 
 // ประกาศตัวแปรสำหรับเก็บค่าเซ็นเซอร์
-static float   temp              = 0;
-static float   humidity          = 0;
-static float   lux_44009         = 0;
-static float   soil              = 0;
+float   temp              = 0;
+float   humidity          = 0;
+float   lux_44009         = 0;
+float   soil              = 0;
 
 // Array สำหรับทำ Movie Arg. ของค่าเซ็นเซอร์ทุก ๆ ค่า
 static float ma_temp[5];
@@ -120,8 +121,15 @@ int t[20];
 #define OPEN        1
 #define CLOSE       0
 
-#define Open_relay(j)    digitalWrite(relay_pin[j], HIGH)
-#define Close_relay(j)   digitalWrite(relay_pin[j], LOW)
+#define Open_relay(j) { \
+  digitalWrite(relay_pin[j], HIGH); \
+  UI_updateOutputStatus(j, true); \
+}
+  
+#define Close_relay(j) { \
+  digitalWrite(relay_pin[j], LOW); \
+  UI_updateOutputStatus(j, false); \
+}
 
 #define connect_WifiStatusToBox     -1
 
@@ -328,7 +336,7 @@ static void send_tempMinMax() {
 }
 
 /* ----------------------- Setting Timer --------------------------- */
-static void timmer_setting(String topic, byte * payload, unsigned int length) {
+void timmer_setting(String topic, byte * payload, unsigned int length) {
   int timer, relay;
   char* str;
   unsigned int count = 0;
@@ -458,14 +466,14 @@ static void ControlRelay_Bytimmer() {
 }
 
 /* ----------------------- Manual Control --------------------------- */
-static void ControlRelay_Bymanual(String topic, String message, unsigned int length) {
+void ControlRelay_Bymanual(String topic, String message, unsigned int length) {
   String manual_message = message;
   int manual_relay = topic.substring(topic.length() - 1).toInt();
   DEBUG_PRINTLN();
   DEBUG_PRINT("manual_message : "); DEBUG_PRINTLN(manual_message);
   DEBUG_PRINT("manual_relay   : "); DEBUG_PRINTLN(manual_relay);
-  if (status_manual[manual_relay] == 0) {
-    status_manual[manual_relay] = 1;
+  //if (status_manual[manual_relay] == 0) {
+    //status_manual[manual_relay] = 1;
     if (manual_message == "on") {
       Open_relay(manual_relay);
       RelayStatus[manual_relay] = 1;
@@ -477,11 +485,11 @@ static void ControlRelay_Bymanual(String topic, String message, unsigned int len
       DEBUG_PRINTLN("OFF man");
     }
     check_sendData_status = 1;
-  }
+  //}
 }
 
 /* ----------------------- SoilMaxMin_setting --------------------------- */
-static void SoilMaxMin_setting(String topic, String message, unsigned int length) {
+void SoilMaxMin_setting(String topic, String message, unsigned int length) {
   String soil_message = message;
   String soil_topic = topic;
   int Relay_SoilMaxMin = topic.substring(topic.length() - 1).toInt();
@@ -504,7 +512,7 @@ static void SoilMaxMin_setting(String topic, String message, unsigned int length
 }
 
 /* ----------------------- TempMaxMin_setting --------------------------- */
-static void TempMaxMin_setting(String topic, String message, unsigned int length) {
+void TempMaxMin_setting(String topic, String message, unsigned int length) {
   String temp_message = message;
   String temp_topic = topic;
   int Relay_TempMaxMin = topic.substring(topic.length() - 1).toInt();
@@ -705,6 +713,29 @@ void webSerialJSON() {
   }
 }
 
+void wifiConfig(String ssid, String password) {
+  jsonDoc.clear();
+
+  { // open configs file
+    File configs_file = SPIFFS.open(CONFIG_FILE);
+    deserializeJson(jsonDoc, configs_file);
+    configs_file.close();
+  }
+
+  // Update ssid and password
+  jsonDoc["ssid"] = ssid;
+  jsonDoc["password"] = password;
+
+  { // write configs file
+    File configs_file = SPIFFS.open(CONFIG_FILE, FILE_WRITE);
+    serializeJson(jsonDoc, configs_file);
+    configs_file.close();
+  }
+
+  delay(100);
+  ESP.restart();
+}
+
 /* --------- อินเตอร์รัป แสดงสถานะการเชื่อม wifi ------------- */
 void HandySense_init() {
   // Serial.begin(115200);
@@ -806,10 +837,18 @@ void HandySense_loop() {
 }
 
 /* --------- Auto Connect Wifi and server and setup value init ------------- */
+bool pause_wifi_task = false;
 void TaskWifiStatus(void * pvParameters) {
   while (1) {
+    if (pause_wifi_task) {
+      delay(10);
+      continue;
+    }
+    
     connectWifiStatus = cannotConnect;
-    WiFi.begin(ssid.c_str(), password.c_str());   
+    if (ssid.length() > 0) {
+      WiFi.begin(ssid.c_str(), password.c_str());   
+    }
      
     while (WiFi.status() != WL_CONNECTED) {
       DEBUG_PRINTLN("WIFI Not connect !!!");

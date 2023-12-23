@@ -1,4 +1,5 @@
 SET(SOURCES screens/ui_Index.c
+    screens/ui_loading_page.c
     ui.c
     components/ui_comp_hook.c
     ui_helpers.c
@@ -11,6 +12,7 @@ SET(SOURCES screens/ui_Index.c
     images/ui_img_504422231.c
     images/ui_img_750881228.c
     images/ui_img_361352527.c
+    images/ui_img_462897253.c
     fonts/ui_font_Kanit20.c
     fonts/ui_font_Kanit24.c)
 
