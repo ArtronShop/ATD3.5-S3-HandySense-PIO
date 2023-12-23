@@ -3,14 +3,43 @@
 #include <ATD3.5-S3.h>
 #include "gui/ui.h"
 #include <driver/i2s.h>
+#include <WiFi.h>
+#include <PubSubClient.h>
+#include "UI.h"
 
-#include "PinConfigs.h"
+static const char * TAG = "UI";
 
-static void sw_click_handle(lv_event_t * e) {
+static void o_switch_click_handle(lv_event_t * e) {
   lv_obj_t * target = lv_event_get_target(e);
   int ch = (int) lv_event_get_user_data(e);
   bool value = lv_obj_has_state(target, LV_STATE_CHECKED);
-  digitalWrite(o_pin[ch - 1], value);
+  // digitalWrite(o_pin[ch - 1], value);
+}
+
+static bool wait_wifi_scan = false;
+static bool scan_finch = false;
+static int scan_found = 0;
+
+void wifi_scan_task(void *) {
+  WiFi.mode(WIFI_STA);
+  WiFi.disconnect();
+  delay(100);
+  scan_found = WiFi.scanNetworks();
+  scan_finch = true;
+  vTaskDelete(NULL);
+}
+
+static void wifi_refresh_click_handle(lv_event_t * e) {
+  lv_obj_clear_flag(ui_loading, LV_OBJ_FLAG_HIDDEN);
+
+  xTaskHandle wifi_scan_task_handle;
+  static int n = 0;
+  scan_finch = false;
+  xTaskCreate(wifi_scan_task, "WiFiScanTask", 2 * 1024, &n, 10, &wifi_scan_task_handle);
+  wait_wifi_scan = true;
+}
+
+static void wifi_save_click_handle(lv_event_t * e) {
 }
 
 // Sound
@@ -64,7 +93,7 @@ void UI_init() {
   i2s_driver_install(i2s_num, &i2s_config, 0, NULL);
   i2s_set_pin(i2s_num, &pin_config);
 
-  Display.begin(0); // rotation number 0
+  Display.begin(1); // rotation number 1
   Touch.begin();
   
   // Map peripheral to LVGL
@@ -74,17 +103,76 @@ void UI_init() {
   // Add load your UI function
   ui_init();
 
-  for (int i=0;i<4;i++) {
-    pinMode(o_pin[i], OUTPUT);
-  }
-
   // Add event handle
-  lv_obj_add_event_cb(ui_sw1, sw_click_handle, LV_EVENT_VALUE_CHANGED, (void*) 1);
-  lv_obj_add_event_cb(ui_sw2, sw_click_handle, LV_EVENT_VALUE_CHANGED, (void*) 2);
-  lv_obj_add_event_cb(ui_sw3, sw_click_handle, LV_EVENT_VALUE_CHANGED, (void*) 3);
-  lv_obj_add_event_cb(ui_sw4, sw_click_handle, LV_EVENT_VALUE_CHANGED, (void*) 4);
+
+  // -- Dashboard
+  lv_obj_add_event_cb(ui_o1_switch, o_switch_click_handle, LV_EVENT_VALUE_CHANGED, (void*) 1);
+  lv_obj_add_event_cb(ui_o2_switch, o_switch_click_handle, LV_EVENT_VALUE_CHANGED, (void*) 2);
+  lv_obj_add_event_cb(ui_o3_switch, o_switch_click_handle, LV_EVENT_VALUE_CHANGED, (void*) 3);
+  lv_obj_add_event_cb(ui_o4_switch, o_switch_click_handle, LV_EVENT_VALUE_CHANGED, (void*) 4);
+
+  // -- Configs
+
+  // -- WiFi
+  lv_obj_add_event_cb(ui_wifi_refresh, wifi_refresh_click_handle, LV_EVENT_CLICKED, NULL);
+  lv_obj_add_event_cb(ui_wifi_save, wifi_save_click_handle, LV_EVENT_CLICKED, NULL);
 }
 
 void UI_loop() {
   Display.loop();
+
+  // Time
+  extern struct tm timeinfo;
+  lv_label_set_text_fmt(ui_time_now_label, "%d:%02d:%02d", timeinfo.tm_hour, timeinfo.tm_min, timeinfo.tm_sec);
+
+  // Update WiFi status
+  if (WiFi.isConnected()) {
+    lv_obj_clear_flag(ui_wifi_status_icon, LV_OBJ_FLAG_HIDDEN);
+
+    // Update cloud status
+    extern PubSubClient client;
+    if (client.connected()) {
+      lv_obj_clear_flag(ui_cloud_status_icon, LV_OBJ_FLAG_HIDDEN);
+    } else {
+      static unsigned long timer = 0;
+      if ((timer == 0) || (millis() < timer) || ((millis() - timer) >= 300)) {
+        timer = millis();
+
+        if (lv_obj_has_flag(ui_cloud_status_icon, LV_OBJ_FLAG_HIDDEN)) {
+          lv_obj_clear_flag(ui_cloud_status_icon, LV_OBJ_FLAG_HIDDEN);
+        } else {
+          lv_obj_add_flag(ui_cloud_status_icon, LV_OBJ_FLAG_HIDDEN);
+        }
+      }
+    }
+  } else {
+    static unsigned long timer = 0;
+    if ((timer == 0) || (millis() < timer) || ((millis() - timer) >= 300)) {
+      timer = millis();
+
+      if (lv_obj_has_flag(ui_wifi_status_icon, LV_OBJ_FLAG_HIDDEN)) {
+        lv_obj_clear_flag(ui_wifi_status_icon, LV_OBJ_FLAG_HIDDEN);
+      } else {
+        lv_obj_add_flag(ui_wifi_status_icon, LV_OBJ_FLAG_HIDDEN);
+      }
+    }
+    
+    // Update cloud status
+    lv_obj_add_flag(ui_cloud_status_icon, LV_OBJ_FLAG_HIDDEN);
+  }
+  
+  // WiFi Scan
+  if (wait_wifi_scan) {
+    if (scan_finch) {
+      // Update wifi name dropdown
+      lv_dropdown_set_options(ui_wifi_name, "");
+      for (int i=0;i<scan_found;i++) {
+        lv_dropdown_add_option(ui_wifi_name, WiFi.SSID(i).c_str(), LV_DROPDOWN_POS_LAST);
+      }
+      lv_obj_add_flag(ui_loading, LV_OBJ_FLAG_HIDDEN);
+
+      WiFi.scanDelete();
+      wait_wifi_scan = false;
+    }
+  }
 }

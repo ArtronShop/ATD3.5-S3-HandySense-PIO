@@ -1,12 +1,4 @@
-#ifndef __HANDY_SENSE__
-#define __HANDY_SENSE__
+#pragma once
 
-void setGetTempFunction(int(*)(float*)) ;
-void setGetHumiFunction(int(*)(float*)) ;
-void setGetSoilFunction(int(*)(float*)) ;
-void setGetLightFunction(int(*)(float*)) ;
-
-void HandySenseSetup() ;
-void HandySenseLoop() ;
-
-#endif
+void HandySense_init() ;
+void HandySense_loop() ;

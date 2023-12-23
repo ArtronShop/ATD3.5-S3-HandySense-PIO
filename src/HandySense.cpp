@@ -11,11 +11,8 @@
 #include <time.h>
 #include <EEPROM.h>
 #include "Artron_DS1338.h"
-
-int (*getTemp)(float*);
-int (*getHumi)(float*);
-int (*getSoil)(float*);
-int (*getLight)(float*);
+#include "Sensor.h"
+#include "PinConfigs.h"
 
 static void timmer_setting(String topic, byte * payload, unsigned int length) ;
 static void SoilMaxMin_setting(String topic, String message, unsigned int length) ;
@@ -26,7 +23,7 @@ static void ControlRelay_Bytimmer() ;
 static void TempMaxMin_setting(String topic, String message, unsigned int length) ;
 static void ControlRelay_Bymanual(String topic, String message, unsigned int length) ;
 
-#ifdef DEBUG
+#ifndef DEBUG
 #define DEBUG_PRINT(x)    //Serial.print(x)
 #define DEBUG_PRINTLN(x)  //Serial.println(x)
 #else
@@ -129,7 +126,7 @@ int t[20];
 #define connect_WifiStatusToBox     -1
 
 /* new PCB Red */
-int relay_pin[4] = {25, 14, 12, 13};
+int relay_pin[4] = { O1_PIN, O2_PIN, O3_PIN, O4_PIN};
 #define status_sht31_error          -1
 #define status_max44009_error       -1
 #define status_soil_error           -1
@@ -404,6 +401,8 @@ static void ControlRelay_Bytimmer() {
   if (!getTimeFromInternet) {
     rtc.read(&timeinfo);
     DEBUG_PRINT("USE RTC 1");
+  } else {
+    rtc.write(&timeinfo); // update time in RTC
   }
   
   yearNow     = timeinfo.tm_year + 1900;
@@ -707,13 +706,14 @@ void webSerialJSON() {
 }
 
 /* --------- อินเตอร์รัป แสดงสถานะการเชื่อม wifi ------------- */
-void HandySenseSetup() {
-  Serial.begin(115200);
+void HandySense_init() {
+  // Serial.begin(115200);
   EEPROM.begin(4096);
 
   Wire.begin();
   Wire.setClock(10000);
   rtc.begin();
+  Sensor_init();
 
   pinMode(relay_pin[0], OUTPUT);
   pinMode(relay_pin[1], OUTPUT);
@@ -749,23 +749,17 @@ void HandySenseSetup() {
   setAll_config();
 }
 
-void HandySenseLoop() {
+void HandySense_loop() {
   client.loop();
-  delay(1); // Keep other task can run
+  // delay(1); // Keep other task can run
 
   unsigned long currentTime = millis();
   if (currentTime - previousTime_Temp_soil >= eventInterval) {
     // Update data
     float newTemp = 0, newSoil = 0;
-    if (getTemp) {
-        getTemp(&newTemp);
-    }
-    if (getHumi) {
-        getHumi(&humidity);
-    }
-    if (getSoil) {
-        getSoil(&newSoil);
-    }
+    Sensor_getTemp(&newTemp);
+    Sensor_getHumi(&humidity);
+    Sensor_getSoil(&newSoil);
 
     bool update_to_server = false;
     if (
@@ -799,9 +793,8 @@ void HandySenseLoop() {
     previousTime_Temp_soil = currentTime;
   }
   if (currentTime - previousTime_brightness >= eventInterval_brightness) {
-    if (getLight) {
-        getLight(&lux_44009);
-    }
+    Sensor_getLight(&lux_44009);
+    lux_44009 /= 1000.0; // lx to Klux
     previousTime_brightness = currentTime;
   }
   unsigned long currentTime_Update_data = millis();
@@ -870,20 +863,3 @@ void TaskWaitSerial(void * WaitSerial) {
     delay(500);
   }
 }
-
-void setGetTempFunction(int(*function)(float*)) {
-    getTemp = function;
-}
-
-void setGetHumiFunction(int(*function)(float*)) {
-    getHumi = function;
-}
-
-void setGetSoilFunction(int(*function)(float*)) {
-    getSoil = function;
-}
-
-void setGetLightFunction(int(*function)(float*)) {
-    getLight = function;
-}
-

@@ -26,35 +26,30 @@ lv_obj_t * ui_sensor_btn;
 lv_obj_t * ui_main_container;
 lv_obj_t * ui_home_container;
 lv_obj_t * ui_Panel4;
-lv_obj_t * ui_Label42;
-lv_obj_t * ui_Container27;
-lv_obj_t * ui_Container28;
-lv_obj_t * ui_Container29;
+lv_obj_t * ui_time_now_label;
+lv_obj_t * ui_wifi_status_icon;
+lv_obj_t * ui_cloud_status_icon;
 lv_obj_t * ui_Container22;
 lv_obj_t * ui_Panel5;
 lv_obj_t * ui_Label51;
-lv_obj_t * ui_Container23;
-lv_obj_t * ui_Label48;
-lv_obj_t * ui_Label49;
-lv_obj_t * ui_Container24;
-lv_obj_t * ui_Label52;
-lv_obj_t * ui_Label53;
-lv_obj_t * ui_Container25;
-lv_obj_t * ui_Label54;
-lv_obj_t * ui_Label55;
-lv_obj_t * ui_Container26;
-lv_obj_t * ui_Label56;
-lv_obj_t * ui_Label57;
+lv_obj_t * ui_temp_sensor_box;
+lv_obj_t * ui_temp_sensor_label;
+lv_obj_t * ui_temp_sensor_value;
+lv_obj_t * ui_humi_sensor_box;
+lv_obj_t * ui_humi_sensor_label;
+lv_obj_t * ui_humi_sensor_value;
+lv_obj_t * ui_soil_sensor_box;
+lv_obj_t * ui_soil_sensor_label;
+lv_obj_t * ui_soil_sensor_value;
+lv_obj_t * ui_light_sensor_box;
+lv_obj_t * ui_light_sensor_label;
+lv_obj_t * ui_light_sensor_value;
 lv_obj_t * ui_switch_status;
 lv_obj_t * ui_Label50;
-lv_obj_t * ui_Container6;
-lv_obj_t * ui_sw1;
-lv_obj_t * ui_Container7;
-lv_obj_t * ui_sw2;
-lv_obj_t * ui_Container8;
-lv_obj_t * ui_sw3;
-lv_obj_t * ui_Container17;
-lv_obj_t * ui_sw4;
+lv_obj_t * ui_o1_switch;
+lv_obj_t * ui_o2_switch;
+lv_obj_t * ui_o3_switch;
+lv_obj_t * ui_o4_switch;
 lv_obj_t * ui_switch_container;
 lv_obj_t * ui_Container9;
 lv_obj_t * ui_Label9;
@@ -133,12 +128,13 @@ lv_obj_t * ui_Label21;
 lv_obj_t * ui_wifi_container;
 lv_obj_t * ui_Label22;
 lv_obj_t * ui_Container15;
-lv_obj_t * ui_Dropdown5;
-lv_obj_t * ui_Button11;
+lv_obj_t * ui_wifi_name;
+lv_obj_t * ui_wifi_refresh;
 lv_obj_t * ui_Label23;
-lv_obj_t * ui_TextArea2;
+void ui_event_wifi_password(lv_event_t * e);
+lv_obj_t * ui_wifi_password;
 lv_obj_t * ui_Container16;
-lv_obj_t * ui_Button12;
+lv_obj_t * ui_wifi_save;
 lv_obj_t * ui_sensor_container;
 lv_obj_t * ui_Label31;
 lv_obj_t * ui_Dropdown1;
@@ -151,11 +147,11 @@ lv_obj_t * ui_Dropdown4;
 lv_obj_t * ui_number_and_time_dialog;
 lv_obj_t * ui_Panel2;
 lv_obj_t * ui_Container18;
-lv_obj_t * ui_Roller1;
-lv_obj_t * ui_Roller3;
-lv_obj_t * ui_Label25;
-lv_obj_t * ui_Roller2;
-lv_obj_t * ui_Roller4;
+lv_obj_t * ui_number_digit1_input;
+lv_obj_t * ui_number_digit2_input;
+lv_obj_t * ui_number_split_label;
+lv_obj_t * ui_number_digit3_input;
+lv_obj_t * ui_number_digit4_input;
 lv_obj_t * ui_Container19;
 void ui_event_Button13(lv_event_t * e);
 lv_obj_t * ui_Button13;
@@ -163,6 +159,9 @@ lv_obj_t * ui_Label26;
 void ui_event_Button14(lv_event_t * e);
 lv_obj_t * ui_Button14;
 lv_obj_t * ui_Label27;
+lv_obj_t * ui_loading;
+lv_obj_t * ui_Spinner1;
+lv_obj_t * ui_main_keyboard;
 lv_obj_t * ui____initial_actions0;
 
 ///////////////////// TEST LVGL SETTINGS ////////////////////
@@ -330,6 +329,18 @@ void ui_event_switch3_select2(lv_event_t * e)
         _ui_state_modify(ui_switch1_select2, LV_STATE_CHECKED, _UI_MODIFY_STATE_REMOVE);
         _ui_state_modify(ui_switch2_select2, LV_STATE_CHECKED, _UI_MODIFY_STATE_REMOVE);
         _ui_state_modify(ui_switch3_select2, LV_STATE_CHECKED, _UI_MODIFY_STATE_ADD);
+    }
+}
+void ui_event_wifi_password(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+    lv_obj_t * target = lv_event_get_target(e);
+    if(event_code == LV_EVENT_CLICKED) {
+        _ui_flag_modify(ui_main_keyboard, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_REMOVE);
+        _ui_keyboard_set_target(ui_main_keyboard,  ui_wifi_password);
+    }
+    if(event_code == LV_EVENT_READY) {
+        _ui_flag_modify(ui_main_keyboard, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_ADD);
     }
 }
 void ui_event_Button13(lv_event_t * e)
