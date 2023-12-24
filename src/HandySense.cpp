@@ -24,7 +24,7 @@ static void ControlRelay_Bytimmer() ;
 static void TempMaxMin_setting(String topic, String message, unsigned int length) ;
 void ControlRelay_Bymanual(String topic, String message, unsigned int length) ;
 
-#define DEBUG
+// #define DEBUG
 
 #ifndef DEBUG
 #define DEBUG_PRINT(x)    //Serial.print(x)
@@ -691,7 +691,7 @@ void HandySense_setTempMax(uint8_t relay, int value) {
 
 void HandySense_setSoilMin(uint8_t relay, int value) {
   Min_Soil[relay] = value;
-  EEPROM.write(relay + 2000,  Min_Soil[relay]);
+  EEPROM.write(relay + 2004,  Min_Soil[relay]);
   EEPROM.commit();
   DEBUG_PRINT("Min_Soil : "); DEBUG_PRINTLN(Min_Soil[relay]);
 
@@ -706,7 +706,7 @@ void HandySense_setSoilMin(uint8_t relay, int value) {
 
 void HandySense_setSoilMax(uint8_t relay, int value) {
   Max_Soil[relay] = value;
-  EEPROM.write(relay + 2004, Max_Soil[relay]);
+  EEPROM.write(relay + 2000, Max_Soil[relay]);
   EEPROM.commit();
   DEBUG_PRINT("Max_Soil : "); DEBUG_PRINTLN(Max_Soil[relay]);
   
