@@ -55,17 +55,45 @@ static void wifi_save_click_handle(lv_event_t * e) {
 }
 
 static lv_obj_t * input_target = NULL;
+enum {
+  INPUT_NUMBER,
+  INPUT_TIME
+} input_type;
+
 static void number_input(lv_event_t * e) {
   input_target = lv_event_get_target(e);
+  input_type = INPUT_NUMBER;
   lv_label_set_text(ui_number_split_label, ".");
+  lv_roller_set_options(ui_number_digit1_input, "0\n1\n2\n3\n4\n5\n6\n7\n8\n9", LV_ROLLER_MODE_NORMAL);
+  lv_roller_set_options(ui_number_digit3_input, "0\n1\n2\n3\n4\n5\n6\n7\n8\n9", LV_ROLLER_MODE_NORMAL);
   lv_obj_add_flag(ui_number_digit4_input, LV_OBJ_FLAG_HIDDEN);
+
+  const char * old_value = lv_label_get_text(input_target);
+  int d12 = 0, d3 = 0;
+  sscanf(old_value, "%d.%1d", &d12, &d3);
+  lv_roller_set_selected(ui_number_digit1_input, (d12 / 10) % 10, LV_ANIM_OFF);
+  lv_roller_set_selected(ui_number_digit2_input, d12 % 10, LV_ANIM_OFF);
+  lv_roller_set_selected(ui_number_digit3_input, d3 % 10, LV_ANIM_OFF);
+
   lv_obj_clear_flag(ui_number_and_time_dialog, LV_OBJ_FLAG_HIDDEN);
 }
 
 static void time_input(lv_event_t * e) {
   input_target = lv_event_get_target(e);
+  input_type = INPUT_TIME;
   lv_label_set_text(ui_number_split_label, ":");
+  lv_roller_set_options(ui_number_digit1_input, "0\n1\n2", LV_ROLLER_MODE_NORMAL);
+  lv_roller_set_options(ui_number_digit3_input, "0\n1\n2\n3\n4\n5", LV_ROLLER_MODE_NORMAL);
   lv_obj_clear_flag(ui_number_digit4_input, LV_OBJ_FLAG_HIDDEN);
+
+  const char * old_value = lv_label_get_text(input_target);
+  int hour = 0, min = 0;
+  sscanf(old_value, "%d:%d", &hour, &min);
+  lv_roller_set_selected(ui_number_digit1_input, (hour / 10) % 10, LV_ANIM_OFF);
+  lv_roller_set_selected(ui_number_digit2_input, hour % 10, LV_ANIM_OFF);
+  lv_roller_set_selected(ui_number_digit3_input, (min / 10) % 10, LV_ANIM_OFF);
+  lv_roller_set_selected(ui_number_digit4_input, min % 10, LV_ANIM_OFF);
+
   lv_obj_clear_flag(ui_number_and_time_dialog, LV_OBJ_FLAG_HIDDEN);
 }
 
@@ -76,8 +104,11 @@ static void number_time_input_save_click_handle(lv_event_t * e) {
   uint16_t digit4 = lv_roller_get_selected(ui_number_digit4_input);
 
   lv_obj_add_flag(ui_number_and_time_dialog, LV_OBJ_FLAG_HIDDEN);
-  // lv_label_set_text_fmt(input_target, "%d%d:%d%d", digit1, digit2, digit3, digit4);
-  lv_label_set_text_fmt(input_target, "%d%d.%d", digit1, digit2, digit3);
+  if (input_type == INPUT_NUMBER) {
+    lv_label_set_text_fmt(input_target, "%d.%d", (digit1 * 10) + digit2, digit3);
+  } else if (input_type == INPUT_TIME) {
+    lv_label_set_text_fmt(input_target, "%d%d:%d%d", digit1, digit2, digit3, digit4);
+  }
   lv_event_send(input_target, LV_EVENT_VALUE_CHANGED, NULL);
 }
 
@@ -156,6 +187,10 @@ void UI_init() {
   lv_obj_add_event_cb(ui_temp_max_input, number_input, LV_EVENT_CLICKED, NULL);
   lv_obj_add_event_cb(ui_soil_min_input, number_input, LV_EVENT_CLICKED, NULL);
   lv_obj_add_event_cb(ui_soil_max_input, number_input, LV_EVENT_CLICKED, NULL);
+
+
+  lv_obj_add_event_cb(ui_time_on_input, time_input, LV_EVENT_CLICKED, NULL);
+  lv_obj_add_event_cb(ui_time_off_input, time_input, LV_EVENT_CLICKED, NULL);
 
   // -- WiFi
   {
