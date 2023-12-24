@@ -63,6 +63,9 @@ lv_obj_t * ui_Label2;
 void ui_event_switch3_select(lv_event_t * e);
 lv_obj_t * ui_switch3_select;
 lv_obj_t * ui_Label11;
+void ui_event_switch4_select(lv_event_t * e);
+lv_obj_t * ui_switch4_select;
+lv_obj_t * ui_Label24;
 lv_obj_t * ui_Container1;
 lv_obj_t * ui_Container2;
 void ui_event_auto_select_btn(lv_event_t * e);
@@ -72,14 +75,14 @@ void ui_event_timer_select_btn(lv_event_t * e);
 lv_obj_t * ui_timer_select_btn;
 lv_obj_t * ui_Label5;
 lv_obj_t * ui_timer_number_select_box;
-void ui_event_switch1_select2(lv_event_t * e);
-lv_obj_t * ui_switch1_select2;
+void ui_event_timer1_select(lv_event_t * e);
+lv_obj_t * ui_timer1_select;
 lv_obj_t * ui_Label3;
-void ui_event_switch2_select2(lv_event_t * e);
-lv_obj_t * ui_switch2_select2;
+void ui_event_timer2_select(lv_event_t * e);
+lv_obj_t * ui_timer2_select;
 lv_obj_t * ui_Label7;
-void ui_event_switch3_select2(lv_event_t * e);
-lv_obj_t * ui_switch3_select2;
+void ui_event_timer3_select(lv_event_t * e);
+lv_obj_t * ui_timer3_select;
 lv_obj_t * ui_Label8;
 lv_obj_t * ui_auto_body;
 lv_obj_t * ui_Label6;
@@ -263,6 +266,7 @@ void ui_event_switch1_select(lv_event_t * e)
         _ui_state_modify(ui_switch1_select, LV_STATE_CHECKED, _UI_MODIFY_STATE_ADD);
         _ui_state_modify(ui_switch2_select, LV_STATE_CHECKED, _UI_MODIFY_STATE_REMOVE);
         _ui_state_modify(ui_switch3_select, LV_STATE_CHECKED, _UI_MODIFY_STATE_REMOVE);
+        _ui_state_modify(ui_switch4_select, LV_STATE_CHECKED, _UI_MODIFY_STATE_REMOVE);
     }
 }
 void ui_event_switch2_select(lv_event_t * e)
@@ -273,6 +277,7 @@ void ui_event_switch2_select(lv_event_t * e)
         _ui_state_modify(ui_switch1_select, LV_STATE_CHECKED, _UI_MODIFY_STATE_REMOVE);
         _ui_state_modify(ui_switch2_select, LV_STATE_CHECKED, _UI_MODIFY_STATE_ADD);
         _ui_state_modify(ui_switch3_select, LV_STATE_CHECKED, _UI_MODIFY_STATE_REMOVE);
+        _ui_state_modify(ui_switch4_select, LV_STATE_CHECKED, _UI_MODIFY_STATE_REMOVE);
     }
 }
 void ui_event_switch3_select(lv_event_t * e)
@@ -283,6 +288,18 @@ void ui_event_switch3_select(lv_event_t * e)
         _ui_state_modify(ui_switch1_select, LV_STATE_CHECKED, _UI_MODIFY_STATE_REMOVE);
         _ui_state_modify(ui_switch2_select, LV_STATE_CHECKED, _UI_MODIFY_STATE_REMOVE);
         _ui_state_modify(ui_switch3_select, LV_STATE_CHECKED, _UI_MODIFY_STATE_ADD);
+        _ui_state_modify(ui_switch4_select, LV_STATE_CHECKED, _UI_MODIFY_STATE_REMOVE);
+    }
+}
+void ui_event_switch4_select(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+    lv_obj_t * target = lv_event_get_target(e);
+    if(event_code == LV_EVENT_CLICKED) {
+        _ui_state_modify(ui_switch1_select, LV_STATE_CHECKED, _UI_MODIFY_STATE_REMOVE);
+        _ui_state_modify(ui_switch2_select, LV_STATE_CHECKED, _UI_MODIFY_STATE_REMOVE);
+        _ui_state_modify(ui_switch3_select, LV_STATE_CHECKED, _UI_MODIFY_STATE_REMOVE);
+        _ui_state_modify(ui_switch4_select, LV_STATE_CHECKED, _UI_MODIFY_STATE_ADD);
     }
 }
 void ui_event_auto_select_btn(lv_event_t * e)
@@ -309,34 +326,34 @@ void ui_event_timer_select_btn(lv_event_t * e)
         _ui_flag_modify(ui_auto_body, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_ADD);
     }
 }
-void ui_event_switch1_select2(lv_event_t * e)
+void ui_event_timer1_select(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_CLICKED) {
-        _ui_state_modify(ui_switch1_select2, LV_STATE_CHECKED, _UI_MODIFY_STATE_ADD);
-        _ui_state_modify(ui_switch2_select2, LV_STATE_CHECKED, _UI_MODIFY_STATE_REMOVE);
-        _ui_state_modify(ui_switch3_select2, LV_STATE_CHECKED, _UI_MODIFY_STATE_REMOVE);
+        _ui_state_modify(ui_timer1_select, LV_STATE_CHECKED, _UI_MODIFY_STATE_ADD);
+        _ui_state_modify(ui_timer2_select, LV_STATE_CHECKED, _UI_MODIFY_STATE_REMOVE);
+        _ui_state_modify(ui_timer3_select, LV_STATE_CHECKED, _UI_MODIFY_STATE_REMOVE);
     }
 }
-void ui_event_switch2_select2(lv_event_t * e)
+void ui_event_timer2_select(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_CLICKED) {
-        _ui_state_modify(ui_switch1_select2, LV_STATE_CHECKED, _UI_MODIFY_STATE_REMOVE);
-        _ui_state_modify(ui_switch2_select2, LV_STATE_CHECKED, _UI_MODIFY_STATE_ADD);
-        _ui_state_modify(ui_switch3_select2, LV_STATE_CHECKED, _UI_MODIFY_STATE_REMOVE);
+        _ui_state_modify(ui_timer1_select, LV_STATE_CHECKED, _UI_MODIFY_STATE_REMOVE);
+        _ui_state_modify(ui_timer2_select, LV_STATE_CHECKED, _UI_MODIFY_STATE_ADD);
+        _ui_state_modify(ui_timer3_select, LV_STATE_CHECKED, _UI_MODIFY_STATE_REMOVE);
     }
 }
-void ui_event_switch3_select2(lv_event_t * e)
+void ui_event_timer3_select(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_CLICKED) {
-        _ui_state_modify(ui_switch1_select2, LV_STATE_CHECKED, _UI_MODIFY_STATE_REMOVE);
-        _ui_state_modify(ui_switch2_select2, LV_STATE_CHECKED, _UI_MODIFY_STATE_REMOVE);
-        _ui_state_modify(ui_switch3_select2, LV_STATE_CHECKED, _UI_MODIFY_STATE_ADD);
+        _ui_state_modify(ui_timer1_select, LV_STATE_CHECKED, _UI_MODIFY_STATE_REMOVE);
+        _ui_state_modify(ui_timer2_select, LV_STATE_CHECKED, _UI_MODIFY_STATE_REMOVE);
+        _ui_state_modify(ui_timer3_select, LV_STATE_CHECKED, _UI_MODIFY_STATE_ADD);
     }
 }
 void ui_event_wifi_password(lv_event_t * e)

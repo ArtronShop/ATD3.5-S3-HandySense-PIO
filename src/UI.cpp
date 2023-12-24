@@ -63,17 +63,20 @@ enum {
 static void number_input(lv_event_t * e) {
   input_target = lv_event_get_target(e);
   input_type = INPUT_NUMBER;
-  lv_label_set_text(ui_number_split_label, ".");
+  // lv_label_set_text(ui_number_split_label, ".");
   lv_roller_set_options(ui_number_digit1_input, "0\n1\n2\n3\n4\n5\n6\n7\n8\n9", LV_ROLLER_MODE_NORMAL);
-  lv_roller_set_options(ui_number_digit3_input, "0\n1\n2\n3\n4\n5\n6\n7\n8\n9", LV_ROLLER_MODE_NORMAL);
+  // lv_roller_set_options(ui_number_digit3_input, "0\n1\n2\n3\n4\n5\n6\n7\n8\n9", LV_ROLLER_MODE_NORMAL);
+  lv_obj_add_flag(ui_number_split_label, LV_OBJ_FLAG_HIDDEN);
+  lv_obj_add_flag(ui_number_digit3_input, LV_OBJ_FLAG_HIDDEN);
   lv_obj_add_flag(ui_number_digit4_input, LV_OBJ_FLAG_HIDDEN);
 
   const char * old_value = lv_label_get_text(input_target);
   int d12 = 0, d3 = 0;
-  sscanf(old_value, "%d.%1d", &d12, &d3);
+  // sscanf(old_value, "%d.%1d", &d12, &d3);
+  d12 = atoi(old_value);
   lv_roller_set_selected(ui_number_digit1_input, (d12 / 10) % 10, LV_ANIM_OFF);
   lv_roller_set_selected(ui_number_digit2_input, d12 % 10, LV_ANIM_OFF);
-  lv_roller_set_selected(ui_number_digit3_input, d3 % 10, LV_ANIM_OFF);
+  // lv_roller_set_selected(ui_number_digit3_input, d3 % 10, LV_ANIM_OFF);
 
   lv_obj_clear_flag(ui_number_and_time_dialog, LV_OBJ_FLAG_HIDDEN);
 }
@@ -81,9 +84,11 @@ static void number_input(lv_event_t * e) {
 static void time_input(lv_event_t * e) {
   input_target = lv_event_get_target(e);
   input_type = INPUT_TIME;
-  lv_label_set_text(ui_number_split_label, ":");
   lv_roller_set_options(ui_number_digit1_input, "0\n1\n2", LV_ROLLER_MODE_NORMAL);
+  lv_label_set_text(ui_number_split_label, ":");
+  lv_obj_clear_flag(ui_number_split_label, LV_OBJ_FLAG_HIDDEN);
   lv_roller_set_options(ui_number_digit3_input, "0\n1\n2\n3\n4\n5", LV_ROLLER_MODE_NORMAL);
+  lv_obj_clear_flag(ui_number_digit3_input, LV_OBJ_FLAG_HIDDEN);
   lv_obj_clear_flag(ui_number_digit4_input, LV_OBJ_FLAG_HIDDEN);
 
   const char * old_value = lv_label_get_text(input_target);
@@ -105,11 +110,115 @@ static void number_time_input_save_click_handle(lv_event_t * e) {
 
   lv_obj_add_flag(ui_number_and_time_dialog, LV_OBJ_FLAG_HIDDEN);
   if (input_type == INPUT_NUMBER) {
-    lv_label_set_text_fmt(input_target, "%d.%d", (digit1 * 10) + digit2, digit3);
+    lv_label_set_text_fmt(input_target, "%d", (digit1 * 10) + digit2);
   } else if (input_type == INPUT_TIME) {
     lv_label_set_text_fmt(input_target, "%d%d:%d%d", digit1, digit2, digit3, digit4);
   }
   lv_event_send(input_target, LV_EVENT_VALUE_CHANGED, NULL);
+}
+
+static void update_temp_soil_ui() ;
+static void update_timer_ui() ;
+
+static int get_switch_select_id() {
+  lv_obj_t * ui_sw_x[] = {
+    ui_switch1_select,
+    ui_switch2_select,
+    ui_switch3_select,
+    ui_switch4_select,
+  };
+  for (uint8_t i=0;i<4;i++) {
+    if (lv_obj_has_state(ui_sw_x[i], LV_STATE_CHECKED)) {
+      return i;
+    }
+  }
+
+  return 0;
+}
+
+static void update_temp_soil_ui() {
+  extern float Min_Temp[], Max_Temp[], Min_Soil[], Max_Soil[];
+
+  int i = get_switch_select_id();
+  lv_label_set_text_fmt(ui_temp_min_input, "%.0f", Min_Temp[i]);
+  lv_label_set_text_fmt(ui_temp_max_input, "%.0f", Max_Temp[i]);
+  lv_label_set_text_fmt(ui_soil_min_input, "%.0f", Min_Soil[i]);
+  lv_label_set_text_fmt(ui_soil_max_input, "%.0f", Max_Soil[i]);
+}
+
+static void switch_x_select_click_handle(lv_event_t * e) {
+  // lv_event_send(ui_auto_select_btn, LV_EVENT_CLICKED, NULL);
+  update_temp_soil_ui();
+  update_timer_ui();
+}
+
+static int get_timer_select_id() {
+  lv_obj_t * ui_timer_x[] = {
+    ui_timer1_select,
+    ui_timer2_select,
+    ui_timer3_select,
+  };
+  for (uint8_t i=0;i<3;i++) {
+    if (lv_obj_has_state(ui_timer_x[i], LV_STATE_CHECKED)) {
+      return i;
+    }
+  }
+
+  return 0;
+}
+
+static void update_timer_ui() {
+  extern unsigned int time_open[4][7][3], time_close[4][7][3];
+
+  int sw_i = get_switch_select_id();
+  int timer_i = get_timer_select_id();
+  /*
+  unsigned int on_time = time_open[sw_i][0][timer_i];
+  unsigned int off_time = time_close[sw_i][0][timer_i];
+  if ((on_time < ((23 * 60) + 59)) && off_time < ((23 * 60) + 59)) {
+    lv_obj_add_state(ui_timer_enable, LV_STATE_CHECKED);
+    lv_label_set_text_fmt(ui_time_on_input, "%02d:%02d", on_time / 60, on_time % 60);
+    lv_label_set_text_fmt(ui_time_off_input, "%02d:%02d", off_time / 60, off_time % 60);
+  } else {
+    lv_obj_clear_state(ui_timer_enable, LV_STATE_CHECKED);
+    lv_label_set_text(ui_time_on_input, "00:00");
+    lv_label_set_text(ui_time_off_input, "00:00");
+  }
+  */
+
+  lv_obj_t * day_x_enable[] = {
+    ui_day1_enable,
+    ui_day2_enable,
+    ui_day3_enable,
+    ui_day4_enable,
+    ui_day5_enable,
+    ui_day6_enable,
+    ui_day7_enable
+  };
+  bool update_time_on_off_input = false;
+  for (uint8_t day_of_week=0;day_of_week<7;day_of_week++) {
+    unsigned int on_time = time_open[sw_i][day_of_week][timer_i];
+    unsigned int off_time = time_close[sw_i][day_of_week][timer_i];
+    if ((on_time < ((23 * 60) + 59)) && off_time < ((23 * 60) + 59)) {
+      lv_obj_add_state(day_x_enable[day_of_week], LV_STATE_CHECKED);
+
+      lv_obj_add_state(ui_timer_enable, LV_STATE_CHECKED);
+      lv_label_set_text_fmt(ui_time_on_input, "%02d:%02d", on_time / 60, on_time % 60);
+      lv_label_set_text_fmt(ui_time_off_input, "%02d:%02d", off_time / 60, off_time % 60);
+      update_time_on_off_input = true;
+    } else {
+      lv_obj_clear_state(day_x_enable[day_of_week], LV_STATE_CHECKED);
+    }
+  }
+  if (!update_time_on_off_input) {
+    lv_obj_clear_state(ui_timer_enable, LV_STATE_CHECKED);
+    lv_label_set_text(ui_time_on_input, "00:00");
+    lv_label_set_text(ui_time_off_input, "00:00");
+  }
+}
+
+static void timer_x_select_click_handle(lv_event_t * e) {
+  update_timer_ui();
 }
 
 // Sound
@@ -183,14 +292,24 @@ void UI_init() {
   lv_obj_add_event_cb(ui_o4_switch, o_switch_click_handle, LV_EVENT_VALUE_CHANGED, (void*) 4);
 
   // -- Configs
+  lv_obj_add_event_cb(ui_switch1_select, switch_x_select_click_handle, LV_EVENT_CLICKED, NULL);
+  lv_obj_add_event_cb(ui_switch2_select, switch_x_select_click_handle, LV_EVENT_CLICKED, NULL);
+  lv_obj_add_event_cb(ui_switch3_select, switch_x_select_click_handle, LV_EVENT_CLICKED, NULL);
+  lv_obj_add_event_cb(ui_switch4_select, switch_x_select_click_handle, LV_EVENT_CLICKED, NULL);
+
   lv_obj_add_event_cb(ui_temp_min_input, number_input, LV_EVENT_CLICKED, NULL);
   lv_obj_add_event_cb(ui_temp_max_input, number_input, LV_EVENT_CLICKED, NULL);
   lv_obj_add_event_cb(ui_soil_min_input, number_input, LV_EVENT_CLICKED, NULL);
   lv_obj_add_event_cb(ui_soil_max_input, number_input, LV_EVENT_CLICKED, NULL);
+  update_temp_soil_ui();
 
+  lv_obj_add_event_cb(ui_timer1_select, timer_x_select_click_handle, LV_EVENT_CLICKED, NULL);
+  lv_obj_add_event_cb(ui_timer2_select, timer_x_select_click_handle, LV_EVENT_CLICKED, NULL);
+  lv_obj_add_event_cb(ui_timer3_select, timer_x_select_click_handle, LV_EVENT_CLICKED, NULL);
 
   lv_obj_add_event_cb(ui_time_on_input, time_input, LV_EVENT_CLICKED, NULL);
   lv_obj_add_event_cb(ui_time_off_input, time_input, LV_EVENT_CLICKED, NULL);
+  update_timer_ui();
 
   // -- WiFi
   {
@@ -300,4 +419,12 @@ void UI_updateOutputStatus(int i, bool isOn) {
   } else {
     lv_obj_clear_state(ox_switch_list[i], LV_STATE_CHECKED);
   }
+}
+
+void UI_updateTempSoilMaxMin() {
+  update_temp_soil_ui();
+}
+
+void UI_updateTimer() {
+  update_timer_ui();
 }

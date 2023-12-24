@@ -24,6 +24,8 @@ static void ControlRelay_Bytimmer() ;
 static void TempMaxMin_setting(String topic, String message, unsigned int length) ;
 void ControlRelay_Bymanual(String topic, String message, unsigned int length) ;
 
+#define DEBUG
+
 #ifndef DEBUG
 #define DEBUG_PRINT(x)    //Serial.print(x)
 #define DEBUG_PRINTLN(x)  //Serial.println(x)
@@ -393,6 +395,7 @@ void timmer_setting(String topic, byte * payload, unsigned int length) {
   else {
     DEBUG_PRINTLN("Not enabled timer, Day !!!");
   }
+  UI_updateTimer();
 }
 
 /* ------------ Control Relay By Timmer ------------- */
@@ -438,15 +441,17 @@ static void ControlRelay_Bytimmer() {
     if (curentTimer != oldTimer) {
       for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 3; j++) {
-          if (time_open[i][dayofweek][j] == curentTimer) {
+          if ((time_open[i][dayofweek][j] == 3000) && (time_close[i][dayofweek][j] == 3000)) { // if timer disable
+            //        Close_relay(i);
+            //        DEBUG_PRINTLN(" Not check day, Not Working relay");
+          } else if ((curentTimer >= time_open[i][dayofweek][j]) && (curentTimer < time_close[i][dayofweek][j])) {
             RelayStatus[i] = 1;
             check_sendData_status = 1;
             Open_relay(i);
             DEBUG_PRINTLN("timer On");
             DEBUG_PRINT("curentTimer : "); DEBUG_PRINTLN(curentTimer);
             DEBUG_PRINT("oldTimer    : "); DEBUG_PRINTLN(oldTimer);
-          }
-          else if (time_close[i][dayofweek][j] == curentTimer) {
+          } else {
             RelayStatus[i] = 0;
             check_sendData_status = 1;
             Close_relay(i);
@@ -454,10 +459,7 @@ static void ControlRelay_Bytimmer() {
             DEBUG_PRINT("curentTimer : "); DEBUG_PRINTLN(curentTimer);
             DEBUG_PRINT("oldTimer    : "); DEBUG_PRINTLN(oldTimer);
           }
-          else if (time_open[i][dayofweek][j] == 3000 && time_close[i][dayofweek][j] == 3000) {
-            //        Close_relay(i);
-            //        DEBUG_PRINTLN(" Not check day, Not Working relay");
-          }
+          
         }
       }
       oldTimer = curentTimer;
@@ -509,6 +511,7 @@ void SoilMaxMin_setting(String topic, String message, unsigned int length) {
     check_sendData_SoilMinMax = 1;
     DEBUG_PRINT("Min_Soil : "); DEBUG_PRINTLN(Min_Soil[Relay_SoilMaxMin]);
   }
+  UI_updateTempSoilMaxMin();
 }
 
 /* ----------------------- TempMaxMin_setting --------------------------- */
@@ -530,6 +533,7 @@ void TempMaxMin_setting(String topic, String message, unsigned int length) {
     check_sendData_tempMinMax = 1;
     DEBUG_PRINT("Min_Temp : "); DEBUG_PRINTLN(Min_Temp[Relay_TempMaxMin]);
   }
+  UI_updateTempSoilMaxMin();
 }
 
 /* ----------------------- soilMinMax_ControlRelay --------------------------- */
@@ -775,12 +779,18 @@ void HandySense_init() {
         ssid          = jsonDoc["ssid"].as<String>();
     }
   }
-  xTaskCreatePinnedToCore(TaskWifiStatus, "WifiStatus", 4096, NULL, 1, &WifiStatus, 1);
-  xTaskCreatePinnedToCore(TaskWaitSerial, "WaitSerial", 8192, NULL, 1, &WaitSerial, 1);
+  xTaskCreatePinnedToCore(TaskWifiStatus, "WifiStatus", 4096, NULL, 10, &WifiStatus, 1);
+  xTaskCreatePinnedToCore(TaskWaitSerial, "WaitSerial", 8192, NULL, 10, &WaitSerial, 1);
   setAll_config();
 }
 
+bool wifi_ready = false;
+
 void HandySense_loop() {
+  if (!wifi_ready) {
+    return;
+  }
+
   client.loop();
   // delay(1); // Keep other task can run
 
@@ -838,13 +848,14 @@ void HandySense_loop() {
 
 /* --------- Auto Connect Wifi and server and setup value init ------------- */
 bool pause_wifi_task = false;
+
 void TaskWifiStatus(void * pvParameters) {
   while (1) {
     if (pause_wifi_task) {
       delay(10);
       continue;
     }
-    
+
     connectWifiStatus = cannotConnect;
     if (ssid.length() > 0) {
       WiFi.begin(ssid.c_str(), password.c_str());   
@@ -885,6 +896,7 @@ void TaskWifiStatus(void * pvParameters) {
       printLocalTime();
       rtc.write(&timeinfo);
     }
+    wifi_ready = true;
     while (WiFi.status() == WL_CONNECTED) { // เชื่อมต่อ wifi แล้ว ไม่ต้องทำอะไรนอกจากส่งค่า
       //UpdateData_To_Server();
       sendStatus_RelaytoWeb();
@@ -892,6 +904,7 @@ void TaskWifiStatus(void * pvParameters) {
       send_tempMinMax();   
       delay(500);
     }
+    wifi_ready = false;
   }
 }
 
