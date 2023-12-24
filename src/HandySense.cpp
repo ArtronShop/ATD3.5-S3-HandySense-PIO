@@ -398,6 +398,129 @@ void timmer_setting(String topic, byte * payload, unsigned int length) {
   UI_updateTimer();
 }
 
+void sendUpdateTimerToServer(uint8_t relay, uint8_t timer) {
+  uint8_t enable = 0;
+  uint8_t day_enable[7];
+  uint8_t time_on_hour = 0, time_on_min = 0, time_off_hour = 0, time_off_min = 0;
+  for (int k = 0; k < 7; k++) {
+    day_enable[k] = ((time_open[relay][k][timer] <= ((23 * 60) + 59)) && (time_close[relay][k][timer] <= ((23 * 60) + 59))) ? 1 : 0;
+    if (day_enable[k]) {
+      enable = 1;
+      time_on_hour = time_open[relay][k][timer] / 60;
+      time_on_min = time_open[relay][k][timer] % 60;
+      time_off_hour = time_close[relay][k][timer] / 60;
+      time_off_min = time_close[relay][k][timer] % 60;
+    }
+  }
+
+  char payload[64];
+  memset(payload, 0, sizeof(payload));
+  sprintf(payload, "{\"data\":{\"value_timer%d%d\":\"%d,%d,%d,%d,%d,%d,%d,%d,%02d:%02d:00,%02d:%02d:00\"}}",
+    relay, timer, enable, day_enable[0], day_enable[1], day_enable[2], day_enable[3], day_enable[4], day_enable[5], day_enable[6], time_on_hour, time_on_min, time_off_hour, time_off_min
+  );
+  DEBUG_PRINT("update shadow : "); DEBUG_PRINTLN(payload);
+  client.publish("@shadow/data/update", payload);
+}
+
+void HandySense_updateTimeInTimer(uint8_t relay, uint8_t timer, bool isTimeOn, uint16_t time) {
+  bool found_enable = false;
+  for (int k = 0; k < 7; k++) {
+    unsigned int on_time = time_open[relay][k][timer];
+    unsigned int off_time = time_close[relay][k][timer];
+    if ((on_time < ((23 * 60) + 59)) && off_time < ((23 * 60) + 59)) {
+      if (isTimeOn) {
+        time_open[relay][k][timer] = time;
+        if (time_close[relay][k][timer] > ((23 * 60) + 59)) {
+            time_close[relay][k][timer] = time + 1;
+        }
+      } else {
+        if (time_open[relay][k][timer] > ((23 * 60) + 59)) {
+            time_open[relay][k][timer] = time;
+            time_close[relay][k][timer] = time + 1;
+        } else {
+          time_close[relay][k][timer] = time;
+        }
+      }
+
+      int address = ((((relay * 7 * 3) + (k * 3) + timer) * 2) * 2) + 2100;
+      EEPROM.write(address, time_open[relay][k][timer] / 256);
+      EEPROM.write(address + 1, time_open[relay][k][timer] % 256);
+      EEPROM.write(address + 2, time_close[relay][k][timer] / 256);
+      EEPROM.write(address + 3, time_close[relay][k][timer] % 256);
+      EEPROM.commit();
+      DEBUG_PRINT("time_open  : "); DEBUG_PRINTLN(time_open[relay][k][timer]);
+      DEBUG_PRINT("time_close : "); DEBUG_PRINTLN(time_close[relay][k][timer]);
+
+      found_enable = true;
+    }
+  }
+
+  if (!found_enable) {
+    // Set all timer to same time
+    for (int k = 0; k < 7; k++) {
+      if (isTimeOn) {
+        time_open[relay][k][timer] = time;
+        if ((time_close[relay][k][timer] > ((23 * 60) + 59)) || (time_close[relay][k][timer] <= time)) {
+            time_close[relay][k][timer] = time + 1;
+        }
+      } else {
+        if ((time_open[relay][k][timer] > ((23 * 60) + 59)) || (time_open[relay][k][timer] >= time)) {
+            time_open[relay][k][timer] = time;
+            time_close[relay][k][timer] = time + 1;
+        } else {
+          time_close[relay][k][timer] = time;
+        }
+      }
+
+      int address = ((((relay * 7 * 3) + (k * 3) + timer) * 2) * 2) + 2100;
+      EEPROM.write(address, time_open[relay][k][timer] / 256);
+      EEPROM.write(address + 1, time_open[relay][k][timer] % 256);
+      EEPROM.write(address + 2, time_close[relay][k][timer] / 256);
+      EEPROM.write(address + 3, time_close[relay][k][timer] % 256);
+      EEPROM.commit();
+      DEBUG_PRINT("time_open  : "); DEBUG_PRINTLN(time_open[relay][k][timer]);
+      DEBUG_PRINT("time_close : "); DEBUG_PRINTLN(time_close[relay][k][timer]);
+    }
+  }
+
+  UI_updateTimer();
+  sendUpdateTimerToServer(relay, timer);
+}
+
+void HandySense_updateDayEnableInTimer(uint8_t relay, uint8_t timer, uint8_t day, bool enable) {
+  int address = ((((relay * 7 * 3) + (day * 3) + timer) * 2) * 2) + 2100;
+  EEPROM.write(address, time_open[relay][day][timer] / 256);
+  EEPROM.write(address + 1, time_open[relay][day][timer] % 256);
+  EEPROM.write(address + 2, time_close[relay][day][timer] / 256);
+  EEPROM.write(address + 3, time_close[relay][day][timer] % 256);
+  EEPROM.commit();
+  DEBUG_PRINT("time_open  : "); DEBUG_PRINTLN(time_open[relay][day][timer]);
+  DEBUG_PRINT("time_close : "); DEBUG_PRINTLN(time_close[relay][day][timer]);
+
+  UI_updateTimer();
+  sendUpdateTimerToServer(relay, timer);
+}
+
+void HandySense_updateDisableTimer(uint8_t relay, uint8_t timer) {
+  // Set all timer to same time
+  for (int k = 0; k < 7; k++) {
+    time_open[relay][k][timer] = 3000;
+    time_close[relay][k][timer] = 3000;
+
+    int address = ((((relay * 7 * 3) + (k * 3) + timer) * 2) * 2) + 2100;
+    EEPROM.write(address, time_open[relay][k][timer] / 256);
+    EEPROM.write(address + 1, time_open[relay][k][timer] % 256);
+    EEPROM.write(address + 2, time_close[relay][k][timer] / 256);
+    EEPROM.write(address + 3, time_close[relay][k][timer] % 256);
+    EEPROM.commit();
+    DEBUG_PRINT("time_open  : "); DEBUG_PRINTLN(time_open[relay][k][timer]);
+    DEBUG_PRINT("time_close : "); DEBUG_PRINTLN(time_close[relay][k][timer]);
+  }
+
+  UI_updateTimer();
+  sendUpdateTimerToServer(relay, timer);
+}
+
 /* ------------ Control Relay By Timmer ------------- */
 static void ControlRelay_Bytimmer() {
   int curentTimer;
@@ -534,6 +657,66 @@ void TempMaxMin_setting(String topic, String message, unsigned int length) {
     DEBUG_PRINT("Min_Temp : "); DEBUG_PRINTLN(Min_Temp[Relay_TempMaxMin]);
   }
   UI_updateTempSoilMaxMin();
+}
+
+void HandySense_setTempMin(uint8_t relay, int value) {
+  Min_Temp[relay] = value;
+  EEPROM.write(relay + 2012,  Min_Temp[relay]);
+  EEPROM.commit();
+  DEBUG_PRINT("Min_Temp : "); DEBUG_PRINTLN(Min_Temp[relay]);
+
+  char payload[64];
+  memset(payload, 0, sizeof(payload));
+  sprintf(payload, "{\"data\":{\"min_temp%d\":%.0f}}",
+    relay, Min_Temp[relay]
+  );
+  DEBUG_PRINT("update shadow : "); DEBUG_PRINTLN(payload);
+  client.publish("@shadow/data/update", payload);
+}
+
+void HandySense_setTempMax(uint8_t relay, int value) {
+  Max_Temp[relay] = value;
+  EEPROM.write(relay + 2008, Max_Temp[relay]);
+  EEPROM.commit();
+  DEBUG_PRINT("Max_Temp : "); DEBUG_PRINTLN(Max_Temp[relay]);
+  
+  char payload[64];
+  memset(payload, 0, sizeof(payload));
+  sprintf(payload, "{\"data\":{\"max_temp%d\":%.0f}}",
+    relay, Max_Temp[relay]
+  );
+  DEBUG_PRINT("update shadow : "); DEBUG_PRINTLN(payload);
+  client.publish("@shadow/data/update", payload);
+}
+
+void HandySense_setSoilMin(uint8_t relay, int value) {
+  Min_Soil[relay] = value;
+  EEPROM.write(relay + 2000,  Min_Soil[relay]);
+  EEPROM.commit();
+  DEBUG_PRINT("Min_Soil : "); DEBUG_PRINTLN(Min_Soil[relay]);
+
+  char payload[64];
+  memset(payload, 0, sizeof(payload));
+  sprintf(payload, "{\"data\":{\"min_soil%d\":%.0f}}",
+    relay, Min_Soil[relay]
+  );
+  DEBUG_PRINT("update shadow : "); DEBUG_PRINTLN(payload);
+  client.publish("@shadow/data/update", payload);
+}
+
+void HandySense_setSoilMax(uint8_t relay, int value) {
+  Max_Soil[relay] = value;
+  EEPROM.write(relay + 2004, Max_Soil[relay]);
+  EEPROM.commit();
+  DEBUG_PRINT("Max_Soil : "); DEBUG_PRINTLN(Max_Soil[relay]);
+  
+  char payload[64];
+  memset(payload, 0, sizeof(payload));
+  sprintf(payload, "{\"data\":{\"max_soil%d\":%.0f}}",
+    relay, Max_Soil[relay]
+  );
+  DEBUG_PRINT("update shadow : "); DEBUG_PRINTLN(payload);
+  client.publish("@shadow/data/update", payload);
 }
 
 /* ----------------------- soilMinMax_ControlRelay --------------------------- */
@@ -857,8 +1040,10 @@ void TaskWifiStatus(void * pvParameters) {
     }
 
     connectWifiStatus = cannotConnect;
-    if (ssid.length() > 0) {
-      WiFi.begin(ssid.c_str(), password.c_str());   
+    if (!WiFi.isConnected()) {
+      if (ssid.length() > 0) {
+        WiFi.begin(ssid.c_str(), password.c_str());   
+      }
     }
      
     while (WiFi.status() != WL_CONNECTED) {
@@ -897,7 +1082,7 @@ void TaskWifiStatus(void * pvParameters) {
       rtc.write(&timeinfo);
     }
     wifi_ready = true;
-    while (WiFi.status() == WL_CONNECTED) { // เชื่อมต่อ wifi แล้ว ไม่ต้องทำอะไรนอกจากส่งค่า
+    while (WiFi.status() == WL_CONNECTED && client.connected()) { // เชื่อมต่อ wifi แล้ว ไม่ต้องทำอะไรนอกจากส่งค่า
       //UpdateData_To_Server();
       sendStatus_RelaytoWeb();
       send_soilMinMax();

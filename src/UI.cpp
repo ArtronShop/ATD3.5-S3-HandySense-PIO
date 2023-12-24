@@ -6,6 +6,7 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include "UI.h"
+#include "HandySense.h"
 #include <PinConfigs.h>
 
 static const char * TAG = "UI";
@@ -152,6 +153,30 @@ static void switch_x_select_click_handle(lv_event_t * e) {
   update_timer_ui();
 }
 
+static void temp_min_value_changed_handle(lv_event_t * e) {
+  int i = get_switch_select_id();
+  int value = atoi(lv_label_get_text(ui_temp_min_input));
+  HandySense_setTempMin(i, value);
+}
+
+static void temp_max_value_changed_handle(lv_event_t * e) {
+  int i = get_switch_select_id();
+  int value = atoi(lv_label_get_text(ui_temp_max_input));
+  HandySense_setTempMax(i, value);
+}
+
+static void soil_min_value_changed_handle(lv_event_t * e) {
+  int i = get_switch_select_id();
+  int value = atoi(lv_label_get_text(ui_soil_min_input));
+  HandySense_setSoilMin(i, value);
+}
+
+static void soil_max_value_changed_handle(lv_event_t * e) {
+  int i = get_switch_select_id();
+  int value = atoi(lv_label_get_text(ui_soil_max_input));
+  HandySense_setSoilMax(i, value);
+}
+
 static int get_timer_select_id() {
   lv_obj_t * ui_timer_x[] = {
     ui_timer1_select,
@@ -219,6 +244,56 @@ static void update_timer_ui() {
 
 static void timer_x_select_click_handle(lv_event_t * e) {
   update_timer_ui();
+}
+
+static void timer_enable_click_handle(lv_event_t * e) {
+  int sw_i = get_switch_select_id();
+  int timer_i = get_timer_select_id();
+  HandySense_updateDisableTimer(sw_i, timer_i);
+}
+
+static void time_on_off_value_changed_handle(lv_event_t * e) {
+  lv_obj_t * target = lv_event_get_target(e);
+  const char * value = lv_label_get_text(target);
+  int hour = 0, min = 0;
+  sscanf(value, "%d:%d", &hour, &min);
+  
+  int sw_i = get_switch_select_id();
+  int timer_i = get_timer_select_id();
+  bool isTimeOn = target == ui_time_on_input;
+  HandySense_updateTimeInTimer(sw_i, timer_i, isTimeOn, (hour * 60) + min);
+}
+
+static void day_x_click_handle(lv_event_t * e) {
+  extern unsigned int time_open[4][7][3], time_close[4][7][3];
+  
+  lv_obj_t * target = lv_event_get_target(e);
+
+  int sw_i = get_switch_select_id();
+  int day_i = (int) lv_event_get_user_data(e);
+  int timer_i = get_timer_select_id();
+  bool enable = lv_obj_has_state(target, LV_STATE_CHECKED);
+
+  if (enable) {
+    {
+      const char * value = lv_label_get_text(ui_time_on_input);
+      int hour = 0, min = 0;
+      sscanf(value, "%d:%d", &hour, &min);
+      time_open[sw_i][day_i][timer_i] = (hour * 60) + min;
+    }
+
+    {
+      const char * value = lv_label_get_text(ui_time_off_input);
+      int hour = 0, min = 0;
+      sscanf(value, "%d:%d", &hour, &min);
+      time_close[sw_i][day_i][timer_i] = (hour * 60) + min;
+    }
+  } else {
+    time_open[sw_i][day_i][timer_i] = 3000;
+    time_close[sw_i][day_i][timer_i] = 3000;
+  }
+
+  HandySense_updateDayEnableInTimer(sw_i, timer_i, day_i, enable);
 }
 
 // Sound
@@ -302,14 +377,30 @@ void UI_init() {
   lv_obj_add_event_cb(ui_soil_min_input, number_input, LV_EVENT_CLICKED, NULL);
   lv_obj_add_event_cb(ui_soil_max_input, number_input, LV_EVENT_CLICKED, NULL);
   update_temp_soil_ui();
+  lv_obj_add_event_cb(ui_temp_min_input, temp_min_value_changed_handle, LV_EVENT_VALUE_CHANGED, NULL);
+  lv_obj_add_event_cb(ui_temp_max_input, temp_max_value_changed_handle, LV_EVENT_VALUE_CHANGED, NULL);
+  lv_obj_add_event_cb(ui_soil_min_input, soil_min_value_changed_handle, LV_EVENT_VALUE_CHANGED, NULL);
+  lv_obj_add_event_cb(ui_soil_max_input, soil_max_value_changed_handle, LV_EVENT_VALUE_CHANGED, NULL);
 
   lv_obj_add_event_cb(ui_timer1_select, timer_x_select_click_handle, LV_EVENT_CLICKED, NULL);
   lv_obj_add_event_cb(ui_timer2_select, timer_x_select_click_handle, LV_EVENT_CLICKED, NULL);
   lv_obj_add_event_cb(ui_timer3_select, timer_x_select_click_handle, LV_EVENT_CLICKED, NULL);
 
+  lv_obj_add_event_cb(ui_timer_enable, timer_enable_click_handle, LV_EVENT_CLICKED, NULL);
+
   lv_obj_add_event_cb(ui_time_on_input, time_input, LV_EVENT_CLICKED, NULL);
   lv_obj_add_event_cb(ui_time_off_input, time_input, LV_EVENT_CLICKED, NULL);
   update_timer_ui();
+  lv_obj_add_event_cb(ui_time_on_input, time_on_off_value_changed_handle, LV_EVENT_VALUE_CHANGED, NULL);
+  lv_obj_add_event_cb(ui_time_off_input, time_on_off_value_changed_handle, LV_EVENT_VALUE_CHANGED, NULL);
+
+  lv_obj_add_event_cb(ui_day1_enable, day_x_click_handle, LV_EVENT_CLICKED, (void *) 0);
+  lv_obj_add_event_cb(ui_day2_enable, day_x_click_handle, LV_EVENT_CLICKED, (void *) 1);
+  lv_obj_add_event_cb(ui_day3_enable, day_x_click_handle, LV_EVENT_CLICKED, (void *) 2);
+  lv_obj_add_event_cb(ui_day4_enable, day_x_click_handle, LV_EVENT_CLICKED, (void *) 3);
+  lv_obj_add_event_cb(ui_day5_enable, day_x_click_handle, LV_EVENT_CLICKED, (void *) 4);
+  lv_obj_add_event_cb(ui_day6_enable, day_x_click_handle, LV_EVENT_CLICKED, (void *) 5);
+  lv_obj_add_event_cb(ui_day7_enable, day_x_click_handle, LV_EVENT_CLICKED, (void *) 6);
 
   // -- WiFi
   {
