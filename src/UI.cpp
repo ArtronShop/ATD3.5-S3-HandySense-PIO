@@ -296,7 +296,7 @@ static void day_x_click_handle(lv_event_t * e) {
 }
 
 void UI_init() {
-  Display.begin(1); // rotation number 1
+  Display.begin(0); // rotation number 0
   Touch.begin();
   Sound.begin();
   
@@ -414,7 +414,7 @@ void UI_loop() {
     lv_label_set_text_fmt(ui_temp_sensor_value, "%.01f °C", temp);
     lv_label_set_text_fmt(ui_humi_sensor_value, "%.01f %%RH", humidity);
     lv_label_set_text_fmt(ui_soil_sensor_value, "%.0f %%", soil);
-    lv_label_set_text_fmt(ui_light_sensor_value, "%.01f kLux", lux_44009);
+    lv_label_set_text_fmt(ui_light_sensor_value, "%.02f kLux", lux_44009);
   }
 
   // WiFi Scan

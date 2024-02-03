@@ -10,7 +10,7 @@
 #include <ArduinoJson.h>
 #include <time.h>
 #include <EEPROM.h>
-#include "Artron_DS1338.h"
+#include "ArtronShop_RTC.h"
 #include "Sensor.h"
 #include "UI.h"
 #include "PinConfigs.h"
@@ -24,7 +24,7 @@ static void ControlRelay_Bytimmer() ;
 static void TempMaxMin_setting(String topic, String message, unsigned int length) ;
 void ControlRelay_Bymanual(String topic, String message, unsigned int length) ;
 
-// #define DEBUG
+#define DEBUG
 
 #ifndef DEBUG
 #define DEBUG_PRINT(x)    //Serial.print(x)
@@ -70,7 +70,7 @@ String mqtt_server ,
 String client_old;
 
 // ประกาศใช้ rtc
-Artron_DS1338 rtc(&Wire);
+ArtronShop_RTC rtc(&Wire, PCF8563);
 
 // ประกาศใช้ WiFiClient
 WiFiClient espClient;
@@ -866,7 +866,8 @@ void Edit_device_wifi() {
   jsonDoc["ssid"]     = NULL;
   jsonDoc["command"]  = NULL;
   Serial.write(STX);                      // 02 คือเริ่มส่ง
-  serializeJsonPretty(jsonDoc, Serial);   // ส่งข่อมูลของ jsonDoc ไปบนเว็บ
+  // serializeJsonPretty(jsonDoc, Serial);   // ส่งข่อมูลของ jsonDoc ไปบนเว็บ
+  Serial.print("{}");
   Serial.write(ETX);                      // 03 คือจบ
 }
 
@@ -970,12 +971,10 @@ void HandySense_init() {
 bool wifi_ready = false;
 
 void HandySense_loop() {
-  if (!wifi_ready) {
-    return;
+  if (wifi_ready) {
+    client.loop();
+    // delay(1); // Keep other task can run
   }
-
-  client.loop();
-  // delay(1); // Keep other task can run
 
   unsigned long currentTime = millis();
   if (currentTime - previousTime_Temp_soil >= eventInterval) {
@@ -1003,7 +1002,7 @@ void HandySense_loop() {
     ControlRelay_BysoilMinMax();
     ControlRelay_BytempMinMax();
 
-    if (update_to_server) {
+    if (wifi_ready && update_to_server) {
         UpdateData_To_Server();
         previousTime_Update_data = millis();
     }
@@ -1022,7 +1021,7 @@ void HandySense_loop() {
     previousTime_brightness = currentTime;
   }
   unsigned long currentTime_Update_data = millis();
-  if (previousTime_Update_data == 0 || (currentTime_Update_data - previousTime_Update_data >= (eventInterval_publishData))) {
+  if ((previousTime_Update_data == 0 || (currentTime_Update_data - previousTime_Update_data >= (eventInterval_publishData))) && wifi_ready) {
     //check_sendData_toWeb = 1;
     UpdateData_To_Server();
     previousTime_Update_data = currentTime_Update_data;
