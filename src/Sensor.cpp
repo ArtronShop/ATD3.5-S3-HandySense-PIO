@@ -1,6 +1,9 @@
 #include <Arduino.h>
 #include "Sensor.h"
+#include "PinConfigs.h"
 #include "User_Select.h"
+
+static const char * TAG = "Sensor";
 
 // include your sensor library
 #include <Wire.h>
@@ -17,7 +20,7 @@
 #include <ArtronShop_BH1750.h>
 #endif
 
-#define SOIL_PIN (1) // A1 pin
+#define SOIL_PIN A1_PIN // A1 pin
 
 #if TEMP_HUMID_SENSOR == SHT20
 SHT2x sht;
@@ -35,36 +38,41 @@ void Sensor_init() { // Setup sensor (like void setup())
   Wire.begin();
 #if TEMP_HUMID_SENSOR == SHT20
   if (!sht.begin()) {
-    Serial.println("SHT2x not found !");
+    ESP_LOGE(TAG, "SHT2x not found !");
   }
 #elif TEMP_HUMID_SENSOR == SHT30
   if (!sht3x.begin()) {
-    Serial.println("SHT3x not found !");
+    ESP_LOGE(TAG, "SHT3x not found !");
   }
 #elif TEMP_HUMID_SENSOR == SHT45
   if (!sht45.begin()) {
-    Serial.println("SHT45 not found !");
+    ESP_LOGE(TAG, "SHT45 not found !");
   }
 #endif
 
 #if LIGHT_SENSOR == BH1750
   if (!bh1750.begin()) {
-    Serial.println("BH1750 not found !");
+    ESP_LOGE(TAG, "BH1750 not found !");
   }
 #endif
 } 
 
 bool Sensor_getTemp(float * value) { // Get Temperature from sensor in °C unit
 #if TEMP_HUMID_SENSOR == SHT20
-  sht.read();
+  if (!sht.read()) {
+    ESP_LOGE(TAG, "SHT2x read fail");
+    return false;
+  }
   *value = sht.getTemperature();
 #elif TEMP_HUMID_SENSOR == SHT30
   if (!sht3x.measure()) {
+    ESP_LOGE(TAG, "SHT3x read fail");
     return false;
   }
   *value = sht3x.temperature();
 #elif TEMP_HUMID_SENSOR == SHT45
   if (!sht45.measure()) {
+    ESP_LOGE(TAG, "SHT45 read fail");
     return false;
   }
   *value = sht45.temperature();
@@ -95,7 +103,9 @@ bool Sensor_getHumi(float * value) { // Get Humidity from sensor in %RH unit
 
 bool Sensor_getSoil(float * value) { // Get Soil moisture from sensor in % unit
 #if SOIL_SENSOR == ANALOG_SOIL_SENSOR
-  *value = map(analogRead(SOIL_PIN), SOIL_ANALOG_MIN, SOIL_ANALOG_MAX, 0, 100);
+  int raw = analogRead(SOIL_PIN);
+  ESP_LOGV(TAG, "A1 analog value : %d", raw);
+  *value = map(raw, SOIL_ANALOG_MIN, SOIL_ANALOG_MAX, 0, 100);
   *value = constrain(*value, 0, 100);
 #endif
 
@@ -106,6 +116,7 @@ bool Sensor_getLight(float * value) { // Get Light from sensor in lux uint
 #if LIGHT_SENSOR == BH1750
   *value = bh1750.light();
   if (*value < 0) {
+    ESP_LOGE(TAG, "BH1750 read fail");
     return false;
   }
 #endif
