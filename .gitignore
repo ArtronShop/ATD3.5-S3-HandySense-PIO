@@ -7,3 +7,4 @@ SquareLine Studio Project/autosave
 SquareLine Studio Project/backup
 SquareLine Studio Project/cache
 dist
+include/version.h
