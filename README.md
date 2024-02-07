@@ -16,7 +16,7 @@
 
 การเปลี่ยนรุ่นเซ็นเซอร์สามารถทำได้โดยแก้ไขไฟล์ `src/UserConfigs.h` โดยแก้ไขดังนี้
 
-```c++
+```cpp
 // Configs use Sensor
 #define TEMP_HUMID_SENSOR SHT45 // <<--- แก้ไขเป็นรุ่นเซ็นเซอร์วัดอุณหภูมิและความชื้น
 #define SOIL_SENSOR       ANALOG_SOIL_SENSOR // <<--- แก้ไขเป็นรุ่นเซ็นเซอร์วัดความชื้นในดิน
