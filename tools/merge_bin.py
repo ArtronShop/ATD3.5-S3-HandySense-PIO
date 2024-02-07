@@ -8,7 +8,8 @@ build_version = ret.stdout.strip()
 
 APP_BIN = "$BUILD_DIR/${PROGNAME}.bin"
 # MERGED_BIN = "$BUILD_DIR/${PROGNAME}_merged.bin"
-MERGED_BIN = "$BUILD_DIR/ATD3.5-S3-HandySense-PIO.{}.bin".format(build_version)
+# MERGED_BIN = "$BUILD_DIR/ATD3.5-S3-HandySense-PIO." + build_version + ".bin"
+MERGED_BIN = "dist/ATD3.5-S3-HandySense-PIO." + build_version + ".bin"
 BOARD_CONFIG = env.BoardConfig()
 
 # print(MERGED_BIN)
@@ -24,27 +25,33 @@ def merge_bin(source, target, env):
             [
                 "$PYTHONEXE",
                 "$OBJCOPY",
-                "--chip",
-                BOARD_CONFIG.get("build.mcu", "esp32s3"),
+                "--chip", BOARD_CONFIG.get("build.mcu", "esp32s3"),
                 "merge_bin",
-                "--fill-flash-size",
-                BOARD_CONFIG.get("upload.flash_size", "8MB"),
-                "-o",
-                MERGED_BIN,
+                "-o", MERGED_BIN,
+                "--flash_mode", "dio",
+                "--flash_freq", "80m",
+                "--flash_size", BOARD_CONFIG.get("upload.flash_size", "8MB"),
             ]
             + flash_images
         )
     )
 
 # Add a post action that runs esptoolpy to merge available flash images
-env.AddPostAction(APP_BIN , merge_bin)
+env.AddPostAction(APP_BIN, merge_bin)
 
 # Patch the upload command to flash the merged binary at address 0x0
-"""
 env.Replace(
-    UPLOADERFLAGS=[
-        ]
-        + ["0x0000", MERGED_BIN],
+    UPLOADERFLAGS=[] + [
+        "--chip", BOARD_CONFIG.get("build.mcu", "esp32s3"),
+        "--port", "\"$UPLOAD_PORT\"",
+        "--baud", "$UPLOAD_SPEED",
+        "--before", BOARD_CONFIG.get("upload.before_reset", "default_reset"),
+        "--after", BOARD_CONFIG.get("upload.after_reset", "hard_reset"),
+        "write_flash", "-z",
+        "--flash_mode", "${__get_board_flash_mode(__env__)}",
+        "--flash_freq", "${__get_board_f_flash(__env__)}",
+        "--flash_size", BOARD_CONFIG.get("upload.flash_size", "8MB"),
+        "0x0000", MERGED_BIN
+    ],
     UPLOADCMD='"$PYTHONEXE" "$UPLOADER" $UPLOADERFLAGS',
 )
-"""
