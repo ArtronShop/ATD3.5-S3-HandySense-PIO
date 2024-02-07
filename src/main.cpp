@@ -2,8 +2,6 @@
 #include "HandySense.h"
 #include "UI.h"
 
-#define LED_Y_PIN (5)
-
 void setup() {
   Serial.begin(115200);
   
