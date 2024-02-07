@@ -304,6 +304,8 @@ void UI_init() {
   Display.useLVGL(); // Map display to LVGL
   Touch.useLVGL(); // Map touch screen to LVGL
   Sound.useLVGL(); // Map speaker to LVGL
+
+  Display.enableAutoSleep(60); // Eanble display enter to sleep mode after not touch on display more then 60 sec
   
   // Add load your UI function
   ui_init();
