@@ -16,3 +16,18 @@
 [submodule "lib/pubsubclient"]
 	path = lib/pubsubclient
 	url = https://github.com/knolleary/pubsubclient.git
+[submodule "lib/ArtronShop_SHT45"]
+	path = lib/ArtronShop_SHT45
+	url = https://github.com/ArtronShop/ArtronShop_SHT45.git
+[submodule "lib/ArtronShop_SHT3x"]
+	path = lib/ArtronShop_SHT3x
+	url = https://github.com/ArtronShop/ArtronShop_SHT3x.git
+[submodule "lib/ArtronShop_BH1750"]
+	path = lib/ArtronShop_BH1750
+	url = https://github.com/ArtronShop/ArtronShop_BH1750.git
+[submodule "lib/SHT2x"]
+	path = lib/SHT2x
+	url = https://github.com/RobTillaart/SHT2x.git
+[submodule "lib/ModbusMaster"]
+	path = lib/ModbusMaster
+	url = https://github.com/4-20ma/ModbusMaster.git
