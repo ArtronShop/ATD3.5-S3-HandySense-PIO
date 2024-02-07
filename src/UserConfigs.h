@@ -1,16 +1,5 @@
 #pragma once
-
-// --- Sensor support list
-// Temperature & Humidity sensor
-#define SHT20 (11)
-#define SHT30 (12)
-#define SHT45 (13)
-
-// Soil sensor
-#define ANALOG_SOIL_SENSOR (21)
-
-// Light sensor
-#define BH1750 (31)
+#include "SensorSupport.h"
 
 // Configs use Sensor
 #define TEMP_HUMID_SENSOR SHT45 // <<--- Select your temp & humid sensor model
