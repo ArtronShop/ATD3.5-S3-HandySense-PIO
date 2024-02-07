@@ -8,7 +8,7 @@ build_version = ret.stdout.strip()
 
 APP_BIN = "$BUILD_DIR/${PROGNAME}.bin"
 # MERGED_BIN = "$BUILD_DIR/${PROGNAME}_merged.bin"
-MERGED_BIN = "$BUILD_DIR/ATD3.5-S3-HandySense-FW.{}.bin".format(build_version)
+MERGED_BIN = "$BUILD_DIR/ATD3.5-S3-HandySense-PIO.{}.bin".format(build_version)
 BOARD_CONFIG = env.BoardConfig()
 
 # print(MERGED_BIN)
