@@ -45,7 +45,7 @@ ModbusMaster ats_lux;
 
 void Sensor_init() { // Setup sensor (like void setup())
   Wire.begin();
-  Serial2.begin(9600, SERIAL_8N1, RS485_RX_PIN, RS485_TX_PIN);
+  // Serial2.begin(9600, SERIAL_8N1, RS485_RX_PIN, RS485_TX_PIN);
 
 #if TEMP_HUMID_SENSOR == SHT20
   if (!sht.begin()) {
@@ -98,10 +98,12 @@ bool Sensor_getTemp(float * value) { // Get Temperature from sensor in °C unit
   }
   *value = sht45.temperature();
 #elif TEMP_HUMID_SENSOR == ATS_TH
+  Serial2.begin(ATS_TH_BAUD, SERIAL_8N1, RS485_RX_PIN, RS485_TX_PIN);
   if (ats_th.readInputRegisters(0x0001, 1) == ats_th.ku8MBSuccess) {
     *value = ats_th.getResponseBuffer(0) / 10.0;
   }
 #elif TEMP_HUMID_SENSOR == XY_MD02
+  Serial2.begin(XY_MD02_BAUD, SERIAL_8N1, RS485_RX_PIN, RS485_TX_PIN);
   if (xy_md02.readInputRegisters(0x0001, 1) == xy_md02.ku8MBSuccess) {
     *value = xy_md02.getResponseBuffer(0) / 10.0;
   }
@@ -125,10 +127,12 @@ bool Sensor_getHumi(float * value) { // Get Humidity from sensor in %RH unit
   } */
   *value = sht45.humidity();
 #elif TEMP_HUMID_SENSOR == ATS_TH
+  Serial2.begin(ATS_TH_BAUD, SERIAL_8N1, RS485_RX_PIN, RS485_TX_PIN);
   if (ats_th.readInputRegisters(0x0002, 1) == ats_th.ku8MBSuccess) {
     *value = ats_th.getResponseBuffer(0) / 10.0;
   }
 #elif TEMP_HUMID_SENSOR == XY_MD02
+  Serial2.begin(XY_MD02_BAUD, SERIAL_8N1, RS485_RX_PIN, RS485_TX_PIN);
   if (xy_md02.readInputRegisters(0x0002, 1) == xy_md02.ku8MBSuccess) {
     *value = xy_md02.getResponseBuffer(0) / 10.0;
   }
@@ -144,6 +148,7 @@ bool Sensor_getSoil(float * value) { // Get Soil moisture from sensor in % unit
   *value = map(raw, SOIL_ANALOG_MIN, SOIL_ANALOG_MAX, 0, 100);
   *value = constrain(*value, 0, 100);
 #elif SOIL_SENSOR == RS485_SOIL_SENSOR
+  Serial2.begin(RS485_SOIL_BAUD, SERIAL_8N1, RS485_RX_PIN, RS485_TX_PIN);
   if (rs485_soil.readHoldingRegisters(0x0000, 1) != rs485_soil.ku8MBSuccess) {
     return false;
   }
