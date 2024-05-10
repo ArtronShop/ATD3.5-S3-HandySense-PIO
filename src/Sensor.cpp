@@ -33,6 +33,10 @@ ModbusMaster ats_th;
 ModbusMaster xy_md02;
 #endif
 
+#if SOIL_SENSOR == RS485_SOIL_SENSOR
+ModbusMaster rs485_soil;
+#endif
+
 #if LIGHT_SENSOR == BH1750
 ArtronShop_BH1750 bh1750(BH1750_ADDR); // Non Jump ADDR: 0x23, Jump ADDR: 0x5C
 #elif TEMP_HUMID_SENSOR == ATS_LUX
@@ -59,6 +63,10 @@ void Sensor_init() { // Setup sensor (like void setup())
   ats_th.begin(ATS_TH_ID, Serial2);
 #elif TEMP_HUMID_SENSOR == XY_MD02
   xy_md02.begin(XY_MD02_ID, Serial2);
+#endif
+
+#if SOIL_SENSOR == RS485_SOIL_SENSOR
+  rs485_soil.begin(RS485_SOIL_ID, Serial2);
 #endif
 
 #if LIGHT_SENSOR == BH1750
@@ -90,11 +98,11 @@ bool Sensor_getTemp(float * value) { // Get Temperature from sensor in °C unit
   }
   *value = sht45.temperature();
 #elif TEMP_HUMID_SENSOR == ATS_TH
-  if (ats_th.readInputRegisters(0x0001, 1) == node.ku8MBSuccess) {
+  if (ats_th.readInputRegisters(0x0001, 1) == ats_th.ku8MBSuccess) {
     *value = ats_th.getResponseBuffer(0) / 10.0;
   }
 #elif TEMP_HUMID_SENSOR == XY_MD02
-  if (ats_th.readInputRegisters(0x0001, 1) == node.ku8MBSuccess) {
+  if (xy_md02.readInputRegisters(0x0001, 1) == xy_md02.ku8MBSuccess) {
     *value = xy_md02.getResponseBuffer(0) / 10.0;
   }
 #endif
@@ -117,11 +125,11 @@ bool Sensor_getHumi(float * value) { // Get Humidity from sensor in %RH unit
   } */
   *value = sht45.humidity();
 #elif TEMP_HUMID_SENSOR == ATS_TH
-  if (ats_th.readInputRegisters(0x0002, 1) == node.ku8MBSuccess) {
+  if (ats_th.readInputRegisters(0x0002, 1) == ats_th.ku8MBSuccess) {
     *value = ats_th.getResponseBuffer(0) / 10.0;
   }
 #elif TEMP_HUMID_SENSOR == XY_MD02
-  if (ats_th.readInputRegisters(0x0002, 1) == node.ku8MBSuccess) {
+  if (xy_md02.readInputRegisters(0x0002, 1) == xy_md02.ku8MBSuccess) {
     *value = xy_md02.getResponseBuffer(0) / 10.0;
   }
 #endif
@@ -135,6 +143,11 @@ bool Sensor_getSoil(float * value) { // Get Soil moisture from sensor in % unit
   ESP_LOGV(TAG, "A1 analog value : %d", raw);
   *value = map(raw, SOIL_ANALOG_MIN, SOIL_ANALOG_MAX, 0, 100);
   *value = constrain(*value, 0, 100);
+#elif SOIL_SENSOR == RS485_SOIL_SENSOR
+  if (rs485_soil.readHoldingRegisters(0x0000, 1) != rs485_soil.ku8MBSuccess) {
+    return false;
+  }
+  *value = rs485_soil.getResponseBuffer(0) / 10.0;
 #endif
 
   return true;

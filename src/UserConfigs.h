@@ -21,6 +21,8 @@
 #define SOIL_PIN        A1_PIN
 #define SOIL_ANALOG_MIN (2900)
 #define SOIL_ANALOG_MAX (1500)
+#elif SOIL_SENSOR == RS485_SOIL_SENSOR
+#define RS485_SOIL_ID  (1)
 #endif
 
 #if LIGHT_SENSOR == BH1750

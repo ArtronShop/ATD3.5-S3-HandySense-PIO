@@ -9,6 +9,7 @@
 
 // Soil sensor
 #define ANALOG_SOIL_SENSOR (21)
+#define RS485_SOIL_SENSOR  (22)
 
 // Light sensor
 #define BH1750  (31)
